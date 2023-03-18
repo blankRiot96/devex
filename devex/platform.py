@@ -17,7 +17,9 @@ class Block:
         ...
 
     def draw(self):
-        self.shared.game_screen.blit(self.img, self.screen_pos)
+        self.shared.game_screen.blit(
+            self.img, self.shared.camera.transform(self.screen_pos)
+        )
 
 
 class BrokenPlatform:

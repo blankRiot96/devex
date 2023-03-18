@@ -10,8 +10,10 @@ class Game:
         self.shared = Shared()
         self.win_init()
 
+        from .cursor import Cursor
         from .states import StateManager
 
+        self.shared.cursor = Cursor()
         self.shared.widgets = Widgets()
         self.state_manager = StateManager()
 
@@ -31,6 +33,10 @@ class Game:
 
     def _update(self):
         self.shared.events = pygame.event.get()
+        self.shared.mouse_press = pygame.mouse.get_pressed()
+        self.shared.dt = self.clock.tick() / 1000
+
+        self.shared.cursor.update()
         self.state_manager.update()
         self.shared.widgets.update()
         self.handle_quit()
