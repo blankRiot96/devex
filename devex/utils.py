@@ -1,6 +1,37 @@
 import pygame
 import typing as t
 from functools import lru_cache
+import time
+import itertools
+
+
+class Time:
+    """
+    Class to check if time has passed.
+    """
+
+    def __init__(self, time_to_pass: float):
+        self.time_to_pass = time_to_pass
+        self.start = time.perf_counter()
+
+    def tick(self) -> bool:
+        if time.perf_counter() - self.start > self.time_to_pass:
+            self.start = time.perf_counter()
+            return True
+        return False
+
+
+class Animation:
+    def __init__(
+        self, frames: t.Sequence[pygame.Surface], time_between_frames: float
+    ) -> None:
+        self.frames = itertools.cycle(frames)
+        self.timer = Time(time_between_frames)
+        self.current_frame = next(self.frames)
+
+    def update(self):
+        if self.timer.tick():
+            self.current_frame = next(self.frames)
 
 
 @lru_cache
