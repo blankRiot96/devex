@@ -61,12 +61,7 @@ class Cursor:
                 event.type == pygame.MOUSEBUTTONDOWN
                 and self.state == CursorState.TOUCHABLE
             ):
-                self.player_target = pygame.Vector2(event.pos)
-                # This is because the actual game screen is 1/3rd of the
-                # display resolution. And the mouse has to be offset
-                # accordingly.
-                self.player_target.x = self.player_target.x / 3
-                self.player_target.y = self.player_target.y / 3
+                self.player_target = event.pos + self.shared.camera.offset
 
     def update(self):
         self.collect_pos()

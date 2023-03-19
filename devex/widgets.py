@@ -58,6 +58,7 @@ class QuitWidget:
         for event in self.shared.events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
                     raise SystemExit
                 elif event.key == pygame.K_RETURN:
                     self.shared.widgets.remove(self)

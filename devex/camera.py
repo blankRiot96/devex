@@ -13,9 +13,9 @@ class Camera:
         return coord[0] - self.offset.x, coord[1] - self.offset.y
 
     def attach_to_player(self):
-        self.offset.x = (
+        self.offset.x += (
             self.shared.player.pos.x - self.offset.x - (self.shared.SCREEN_WIDTH // 2)
         ) * self.DRAG
-        self.offset.y = (
+        self.offset.y += (
             self.shared.player.pos.y - self.offset.y - (self.shared.SCREEN_HEIGHT // 2)
         ) * self.DRAG

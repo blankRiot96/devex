@@ -1,25 +1,23 @@
 import random
 import pygame
-from .utils import iso_to_screen, get_font
+from .utils import iso_to_screen, load_scale_3
 from .shared import Shared
 
 
 class Block:
-    img = pygame.image.load("assets/brick_block_1.png").convert_alpha()
+    img = load_scale_3("assets/brick_block_1.png")
 
     def __init__(self, iso_pos) -> None:
-        self.iso_pos = iso_pos
+        self.iso_pos = iso_pos[0] + 10, iso_pos[1] + 1
         self.rect = self.img.get_rect()
-        self.screen_pos = iso_to_screen((iso_pos[0] + 10, iso_pos[1] + 1), self.rect)
+        self.screen_pos = iso_to_screen(iso_pos, self.rect)
         self.shared = Shared()
 
     def update(self):
         ...
 
     def draw(self):
-        self.shared.game_screen.blit(
-            self.img, self.shared.camera.transform(self.screen_pos)
-        )
+        self.shared.screen.blit(self.img, self.shared.camera.transform(self.screen_pos))
 
 
 class BrokenPlatform:

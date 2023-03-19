@@ -11,10 +11,6 @@ class GameState:
     def __init__(self) -> None:
         self.next_state = None
         self.shared = Shared(camera=Camera())
-        self.shared.game_screen = pygame.Surface(
-            (self.shared.SCREEN_WIDTH // 3, self.shared.SCREEN_HEIGHT // 3),
-            pygame.SRCALPHA,
-        )
         self.origin = pygame.Vector2(100, 150)
         self.plat = BrokenPlatform()
         self.player = Player(self.origin)
@@ -25,15 +21,5 @@ class GameState:
         self.player.update()
 
     def draw(self):
-        self.shared.game_screen.fill("black")
         self.plat.draw()
         self.player.draw()
-
-        render_at(
-            self.shared.screen,
-            pygame.transform.scale(
-                self.shared.game_screen,
-                (self.shared.SCREEN_WIDTH, self.shared.SCREEN_HEIGHT),
-            ),
-            "center",
-        )

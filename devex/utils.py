@@ -65,3 +65,10 @@ def iso_to_screen(iso_pos: t.Sequence, tile_rect: pygame.Rect) -> t.Sequence:
     screen_y = (x + y) * (tile_rect.height / 4)
 
     return screen_x, screen_y
+
+def load_scale_3(file_path: str) -> pygame.Surface:
+    img = pygame.image.load(file_path).convert_alpha()
+    return pygame.transform.scale(
+        img,
+        (img.get_width() * 3, img.get_height() * 3)
+    )
