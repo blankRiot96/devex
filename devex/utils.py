@@ -3,6 +3,20 @@ import typing as t
 from functools import lru_cache
 import time
 import itertools
+import math
+
+
+class SinWave:
+    def __init__(self, speed: float) -> None:
+        self.rad = 0.0
+        self.speed = speed
+
+    def val(self) -> float:
+        self.rad += self.speed
+        if self.rad >= 2 * math.pi:
+            self.rad = 0
+
+        return math.sin(self.rad)
 
 
 class Time:
@@ -39,6 +53,12 @@ def get_font(file_name: str | None, size: t.Sequence) -> pygame.font.Font:
     return pygame.font.Font(file_name, size)
 
 
+def circle_surf(radius: float, color) -> pygame.Surface:
+    surf = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+    pygame.draw.circle(surf, color, (radius, radius), radius)
+    return surf
+
+
 def render_at(
     base_surf: pygame.Surface,
     surf: pygame.Surface,
@@ -66,9 +86,19 @@ def iso_to_screen(iso_pos: t.Sequence, tile_rect: pygame.Rect) -> t.Sequence:
 
     return screen_x, screen_y
 
+
 def load_scale_3(file_path: str) -> pygame.Surface:
     img = pygame.image.load(file_path).convert_alpha()
+    return pygame.transform.scale(img, (img.get_width() * 3, img.get_height() * 3))
+
+
+def scale_by(img: pygame.Surface, factor: float | int) -> pygame.Surface:
     return pygame.transform.scale(
-        img,
-        (img.get_width() * 3, img.get_height() * 3)
+        img, (img.get_width() * factor, img.get_height() * factor)
+    )
+
+
+def scale_add(img: pygame.Surface, term: float | int) -> pygame.Surface:
+    return pygame.transform.scale(
+        img, (img.get_width() + term, img.get_height() + term)
     )

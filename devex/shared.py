@@ -11,7 +11,8 @@ class Shared:
     SCREEN_WIDTH, SCREEN_HEIGHT = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
     SCRECT = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
     screen: pygame.Surface
-    game_screen: pygame.Surface
+    overlay: pygame.Surface
+
     events: list[pygame.event.Event]
     dt: float
 

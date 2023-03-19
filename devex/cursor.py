@@ -48,7 +48,7 @@ class Cursor:
 
     def on_forbidden(self):
         try:
-            if self.shared.screen.get_at(self.pos) != self.surface_color:
+            if self.shared.provisional_chunk.get_at(self.pos) != self.surface_color:
                 self.state = CursorState.FORBIDDEN
             else:
                 self.state = CursorState.TOUCHABLE
