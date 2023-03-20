@@ -18,6 +18,7 @@ class Enemy(ABC):
         broken_platform_size: int,
         tile_rect: pygame.Rect,
         enemy_speed: float,
+        origin: tuple[int, int],
     ) -> None:
         self.shared = Shared()
         self.data_type = data_type
@@ -25,6 +26,7 @@ class Enemy(ABC):
         self.image = image
         self.rect = self.image.get_rect()
         self.broken_platform_size = broken_platform_size
+        self.origin = origin
 
         """
         So, the iso_pos is basically gonna hold a value such as
@@ -49,13 +51,14 @@ class Enemy(ABC):
         x_or_y: int = random.randint(0, 1)
 
         # Applies the parameters
-        axis_range = range(1, n_steps)
+        axis_range_x = range(1 + self.origin[0], n_steps + self.origin[0])
+        axis_range_y = range(1 + self.origin[1], n_steps + self.origin[1])
 
         # Produces the result
         if x_or_y:
-            return [(self.iso_pos[0], axis) for axis in axis_range]
+            return [(self.iso_pos[0], axis) for axis in axis_range_y]
 
-        return [(axis, self.iso_pos[1]) for axis in axis_range]
+        return [(axis, self.iso_pos[1]) for axis in axis_range_x]
 
     def set_font_surf(self):
         self.font_surf = self.font.render(str(self.value), True, self.data_font_color)
@@ -80,10 +83,12 @@ class PotatoInt(Enemy):
     IMAGE = load_scale_3("assets/integer.png")
     SPEED = 30
 
-    def __init__(self, broken_platform_size: int, tile_rect: pygame.Rect) -> None:
+    def __init__(
+        self, broken_platform_size: int, tile_rect: pygame.Rect, origin: tuple[int, int]
+    ) -> None:
         iso_pos = (
-            random.randrange(2, broken_platform_size - 2),
-            random.randrange(2, broken_platform_size - 2),
+            random.randrange(2, broken_platform_size - 2) + origin[0],
+            random.randrange(2, broken_platform_size - 2) + origin[1],
         )
         super().__init__(
             int,
@@ -93,6 +98,7 @@ class PotatoInt(Enemy):
             broken_platform_size,
             tile_rect,
             PotatoInt.SPEED,
+            origin,
         )
 
         self.value = random.randrange(100, 10000)

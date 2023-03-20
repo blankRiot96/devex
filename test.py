@@ -41,7 +41,7 @@ while True:
 
     overlay.fill("black")
     overlay.blit(bloom, bloom_rect)
-    screen.blit(overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+    screen.blit(overlay, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
 
     pygame.display.update()
     clock.tick(60)

@@ -28,6 +28,7 @@ class GameState:
         self.plat.draw()
         if self.plat.done:
             self.player.draw()
+            self.plat.draw_torches()
             self.shared.screen.blit(
                 self.shared.overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MIN
             )

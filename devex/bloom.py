@@ -11,18 +11,23 @@ def process_bloom(img: pygame.Surface) -> pygame.Surface:
 
 
 class Bloom:
-    IMAGE = pygame.image.load("assets/light.png").convert()
+    IMAGE = pygame.image.load("assets/light_v2.png").convert_alpha()
     # IMAGE = process_bloom(IMAGE)
 
-    def __init__(self, size_factor: float | int) -> None:
+    def __init__(
+        self, size_factor: float | int, wave_speed: float, expansion_factor: int
+    ) -> None:
         self.size_factor = size_factor
         self.original_surf = scale_by(self.IMAGE, size_factor)
         self.surf = self.original_surf.copy()
         self.rect = self.surf.get_rect()
-        self.wave = SinWave(0.02)
+        self.wave = SinWave(wave_speed)
+        self.expansion_factor = expansion_factor
 
     def update(self, pos):
-        self.surf = scale_add(self.original_surf, self.wave.val() * 70)
+        self.surf = scale_add(
+            self.original_surf, self.wave.val() * self.expansion_factor
+        )
         self.rect = self.surf.get_rect()
         self.rect.center = pos
 

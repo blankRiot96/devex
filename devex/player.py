@@ -9,9 +9,14 @@ class Player:
         self.shared = Shared()
         self.pos = origin.copy()
         self.frames = [load_scale_3(f"assets/player-anim-{n}.png") for n in range(1, 7)]
+        self.birby_frames = [
+            load_scale_3(f"assets/player-birb-{n}.png") for n in range(1, 3)
+        ]
         self.rect = self.frames[0].get_rect(midbottom=self.pos)
-        self.anim = Animation(self.frames, 0.3)
-        self.bloom = Bloom(2)
+        self.idle_anim = Animation(self.frames, 0.3)
+        self.bloom = Bloom(2, wave_speed=0.02, expansion_factor=70)
+        self.birb_anim = Animation(self.birby_frames, 0.3)
+        self.anim = self.idle_anim
 
     def update(self):
         self.anim.update()
@@ -23,6 +28,16 @@ class Player:
 
         self.rect.midbottom = self.pos
         self.bloom.update(self.shared.camera.transform(self.rect.center))
+
+        if (
+            self.shared.provisional_chunk.get_at(
+                tuple(map(int, self.shared.camera.transform(self.rect.midbottom)))
+            )
+            != self.shared.cursor.surface_color
+        ):
+            self.anim = self.birb_anim
+        else:
+            self.anim = self.idle_anim
 
     def draw(self):
         self.shared.screen.blit(
