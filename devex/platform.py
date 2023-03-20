@@ -4,7 +4,7 @@ from enum import Enum, auto
 from .utils import get_font, iso_to_screen, load_scale_3, Time, Animation
 from .bloom import Bloom
 from .shared import Shared
-from .enemies import PotatoInt, Enemy
+from .enemies import Enemy, PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet
 from logit import log
 
 
@@ -73,7 +73,7 @@ class Torch:
         if self.path_side == TorchSide.UP:
             return TorchSide.DOWN
         if self.path_side == TorchSide.DOWN:
-            return TorchSide.DOWN
+            return TorchSide.UP
         if self.path_side == TorchSide.RIGHT:
             return TorchSide.LEFT
         if self.path_side == TorchSide.LEFT:
@@ -170,10 +170,11 @@ class BrokenPlatform:
         n_enemies = int(self.side / 2.5)
         self.enemies: list[Enemy] = []
         for _ in range(n_enemies):
-            enemy_type = PotatoInt
-            # enemy_type = random.choice((PotatoInt, ...))
+            enemy_type = random.choice(
+                (PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet)
+            )
             self.enemies.append(
-                PotatoInt(self.side, self.blocks[0][0].rect, self.origin)
+                enemy_type(self.side, self.blocks[1][1].rect, self.origin)
             )
 
     def generate_base(self):
