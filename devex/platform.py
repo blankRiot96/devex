@@ -13,11 +13,11 @@ class Block:
         self.shared = Shared()
         self.rect = self.img.get_rect()
         self.screen_pos = iso_to_screen(iso_pos, self.rect)
-        self.pos = pygame.Vector2(self.screen_pos[0], self.shared.SCREEN_HEIGHT)
+        self.pos = pygame.Vector2(self.screen_pos[0], self.screen_pos[1] + 150)
         self.start_timer = Time(random.uniform(0, 5))
         self.done = False
         self.done_waiting = False
-        self.speed = 300
+        self.speed = 500
 
     def update(self):
         if not self.done_waiting and not self.start_timer.tick():
@@ -32,6 +32,8 @@ class Block:
         self.speed += 500 * self.shared.dt
 
     def draw(self):
+        if not self.done_waiting:
+            return
         self.shared.screen.blit(self.img, self.shared.camera.transform(self.pos))
 
 
@@ -108,8 +110,10 @@ class BrokenPlatform:
 
 class PlatformManager:
     def __init__(self) -> None:
-        self.platforms: list[BrokenPlatform] = [BrokenPlatform()]
         self.shared = Shared()
+        self.platforms: list[BrokenPlatform] = [BrokenPlatform()]
+        self.current_chunk_index = 0
+        self.shared.current_chunk = self.platforms[self.current_chunk_index]
         self.done = False
 
     def update_platforms(self):

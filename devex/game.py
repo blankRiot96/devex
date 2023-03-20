@@ -44,6 +44,7 @@ class Game:
     def _draw(self):
         self.shared.screen.fill("black")
         self.state_manager.draw()
+        self.shared.cursor.draw()
         self.shared.widgets.draw()
 
         pygame.display.flip()
