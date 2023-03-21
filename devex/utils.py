@@ -6,6 +6,18 @@ import itertools
 import math
 
 
+class Projectile:
+    def __init__(self, radians: float, speed: float) -> None:
+        self.radians = radians
+        self.speed = speed
+
+    def get_delta_velocity(self, dt: float):
+        self.dx = math.cos(self.radians) * self.speed * dt
+        self.dy = math.sin(self.radians) * self.speed * dt
+
+        self.dv = pygame.Vector2(self.dx, self.dy)
+
+
 class SinWave:
     def __init__(self, speed: float) -> None:
         self.rad = 0.0

@@ -1,7 +1,6 @@
 import pygame
 from logit import log
 from .shared import Shared
-from .widgets import QuitWidget, Widgets
 
 
 class Game:
@@ -12,6 +11,7 @@ class Game:
 
         from .cursor import Cursor
         from .states import StateManager
+        from .widgets import Widgets
 
         self.shared.cursor = Cursor()
         self.shared.widgets = Widgets()
@@ -25,12 +25,6 @@ class Game:
         )
         self.clock = pygame.time.Clock()
 
-    def handle_quit(self):
-        for event in self.shared.events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.shared.widgets.add(QuitWidget, (50, 50))
-
     def _update(self):
         self.shared.events = pygame.event.get()
         self.shared.mouse_press = pygame.mouse.get_pressed()
@@ -39,7 +33,6 @@ class Game:
         self.shared.cursor.update()
         self.state_manager.update()
         self.shared.widgets.update()
-        self.handle_quit()
 
     def _draw(self):
         self.shared.screen.fill("black")

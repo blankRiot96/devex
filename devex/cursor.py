@@ -1,4 +1,5 @@
 import pygame
+import math
 from .shared import Shared
 from enum import Enum, auto
 from .utils import scale_by
@@ -68,6 +69,7 @@ class Cursor:
         self.surface_color = pygame.Color((50, 83, 95))
         self.player_target = None
         self.anim: CursorAnimation | None = None
+        self.radians_between_player = 0.0
 
     @property
     def state(self) -> CursorState:
@@ -80,6 +82,10 @@ class Cursor:
     def collect_pos(self):
         self.pos = pygame.mouse.get_pos()
         self.trans_pos = self.pos + self.shared.camera.offset
+        self.radians_between_player = math.atan2(
+            self.trans_pos.y - self.shared.player.pos.y,
+            self.trans_pos.x - self.shared.player.pos.x,
+        )
 
     def on_forbidden(self):
         try:

@@ -1,6 +1,6 @@
 import pygame
 import random
-from .utils import load_scale_3, iso_to_screen, get_font
+from .utils import load_scale_3, iso_to_screen, get_font, SinWave
 from abc import ABC
 from .shared import Shared
 import itertools
@@ -20,14 +20,17 @@ class Enemy(ABC):
         tile_rect: pygame.Rect,
         enemy_speed: float,
         origin: tuple[int, int],
+        bouncy_direction: str = "vertical",
     ) -> None:
         self.shared = Shared()
         self.data_type = data_type
         self.data_font_color = data_font_color
-        self.image = image
+        self.original_image = image.copy()
+        self.image = self.original_image.copy()
         self.rect = self.image.get_rect()
         self.broken_platform_size = broken_platform_size
         self.origin = origin
+        self.bouncy_direction = bouncy_direction
 
         """
         So, the iso_pos is basically gonna hold a value such as
@@ -38,11 +41,18 @@ class Enemy(ABC):
         self.iso_path_range = self.calc_path_range()
         self.initial_screen_pos = iso_to_screen(self.iso_path_range[0], tile_rect)
         self.final_screen_pos = iso_to_screen(self.iso_path_range[-1], tile_rect)
-
         self.targets = itertools.cycle((self.initial_screen_pos, self.final_screen_pos))
         self.current_target = self.initial_screen_pos
         self.pos = pygame.Vector2(self.initial_screen_pos)
         self.speed = enemy_speed
+
+        """Image morphing"""
+        if bouncy_direction == "vertical":
+            self.size = self.image.get_height()
+        else:
+            self.size = self.image.get_width()
+        self.original_size = self.size
+        self.bouncy_wave = SinWave(0.06)
 
     def calc_path_range(self) -> None:
         """Calculates the path range for the enemy."""
@@ -65,13 +75,27 @@ class Enemy(ABC):
         self.font_surf = self.font.render(str(self.value), True, self.data_font_color)
         self.font_rect = self.font_surf.get_rect()
 
-    def update(self):
+    def move(self):
         self.pos.move_towards_ip(self.current_target, self.speed * self.shared.dt)
         if self.pos == self.current_target:
             self.current_target = next(self.targets)
 
         self.rect.midbottom = self.pos
         self.font_rect.midtop = self.pos
+
+    def morph_image(self):
+        """Create a bouncy animation for the enemy"""
+
+        self.size = self.original_size + (self.bouncy_wave.val() * 5)
+        if self.bouncy_direction == "vertical":
+            new_size = self.original_image.get_width(), self.size
+        else:
+            new_size = self.size, self.original_image.get_height()
+        self.image = pygame.transform.scale(self.original_image, new_size)
+
+    def update(self):
+        self.move()
+        self.morph_image()
 
     def draw(self):
         self.shared.screen.blit(self.image, self.shared.camera.transform(self.rect))
@@ -128,6 +152,7 @@ class CentiSet(Enemy):
             tile_rect,
             CentiSet.SPEED,
             origin,
+            bouncy_direction="horizontal",
         )
 
         self.value = {random.randrange(1, 10) for _ in range(random.randrange(2, 5))}
