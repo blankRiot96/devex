@@ -93,7 +93,7 @@ class Player:
         ]
         self.rect = self.frames[0].get_rect(midbottom=self.pos)
         self.idle_anim = Animation(self.frames, 0.3)
-        self.bloom = Bloom(2, wave_speed=0.02, expansion_factor=70)
+        self.bloom = Bloom(2, wave_speed=0.02, expansion_factor=70, v2=False)
         self.birb_anim = Animation(self.birby_frames, 0.3)
         self.anim = self.idle_anim
         self.fireball_manager = FireballManager()

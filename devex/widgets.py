@@ -1,9 +1,10 @@
-from typing import Protocol, Sequence
+from typing import Protocol, Sequence, MutableSequence
 import pygame
 from .utils import get_font, render_at, scale_by
 from .shared import Shared
 from .enemies import PotatoInt, BeeList, PoopyBytes, CentiSet, HumanStr
 from logit import log
+from dataclasses import dataclass
 
 
 class Widget(Protocol):
@@ -17,6 +18,26 @@ class Widget(Protocol):
         ...
 
 
+@dataclass
+class Scrollable:
+    surf: pygame.Surface
+    pos: MutableSequence
+
+
+class VerticalScrollBar:
+    def __init__(self) -> None:
+        self.scrollables: list[Scrollable] = []
+
+    def add(self, scrollable: Scrollable) -> None:
+        self.scrollables.append(scrollable)
+
+    def update(self):
+        ...
+
+    def draw(self):
+        ...
+
+
 class Widgets:
     def __init__(self) -> None:
         self.shared = Shared(
@@ -26,6 +47,7 @@ class Widgets:
         self.preview_options: dict[int, list[Widget | str]] = {
             pygame.K_i: [InventoryWidget, "closed"],
             pygame.K_l: [MessageLogWidget, "closed"],
+            pygame.K_p: [ProgramWidget, "closed"],
         }
 
     def add(self, widget: Widget, pos: Sequence):
@@ -114,9 +136,13 @@ class InventoryWidget:
         self.surf.fill((60, 60, 60))
         self.surf.set_alpha(150)
         self.pos = pygame.Vector2(pos)
+        self.filled_vertical_space = 0
         self.gen_image_slots()
 
     def gen_image_slots(self):
+        title = self.FONT.render("Inventory", True, "white")
+        self.surf.blit(title, (20, 10))
+        self.filled_vertical_space += title.get_height() + 10
         index = 0
         for slot, quantity in self.shared.slots.items():
             surf = pygame.Surface((48, 48))
@@ -128,7 +154,8 @@ class InventoryWidget:
 
             x = (surf.get_width() + InventoryWidget.ITEM_SPACING) * index
             x += InventoryWidget.ITEM_SPACING
-            y = InventoryWidget.ITEM_SPACING
+            y = self.filled_vertical_space
+            y += InventoryWidget.ITEM_SPACING
             self.surf.blit(surf, (x, y))
 
             index += 1
@@ -146,10 +173,28 @@ class MessageLogWidget:
 
     def __init__(self, pos) -> None:
         self.shared = Shared()
-        self.surf = pygame.Surface(InventoryWidget.SIZE)
-        self.surf.fill("grey")
+        self.surf = pygame.Surface(MessageLogWidget.SIZE)
+        self.surf.fill((60, 60, 60))
         self.surf.set_alpha(150)
         self.pos = pygame.Vector2(pos)
+
+    def update(self):
+        ...
+
+    def draw(self):
+        self.shared.screen.blit(self.surf, self.pos)
+
+
+class ProgramWidget:
+    SIZE = InventoryWidget.SIZE[0], Shared.SCREEN_HEIGHT - InventoryWidget.SIZE[1] - 20
+    IDEAL_POS = Shared.SCRECT.bottomleft - pygame.Vector2(0, SIZE[1])
+
+    def __init__(self, pos) -> None:
+        self.surf = pygame.Surface(ProgramWidget.SIZE)
+        self.surf.fill((60, 60, 60))
+        self.surf.set_alpha(150)
+        self.pos = pos
+        self.shared = Shared()
 
     def update(self):
         ...

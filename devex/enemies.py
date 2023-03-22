@@ -63,7 +63,7 @@ class Enemy(ABC):
         self.original_size = self.size
         self.bouncy_wave = SinWave(0.06)
         self.taking_damage = False
-        self.higlight_alpha = 150
+        self.higlight_alpha = 200
 
     def calc_path_range(self) -> None:
         """Calculates the path range for the enemy."""
@@ -90,9 +90,9 @@ class Enemy(ABC):
         surf.fill("red")
         surf.set_alpha(self.higlight_alpha)
         self.higlight_alpha -= 100 * self.shared.dt
-        if self.higlight_alpha <= 100:
+        if self.higlight_alpha <= 120:
             self.taking_damage = False
-            self.higlight_alpha = 150
+            self.higlight_alpha = 200
         self.image.blit(surf, (0, 0))
 
     def take_damage(self):
