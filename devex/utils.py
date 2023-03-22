@@ -40,6 +40,9 @@ class Time:
         self.time_to_pass = time_to_pass
         self.start = time.perf_counter()
 
+    def reset(self):
+        self.start = time.perf_counter()
+
     def tick(self) -> bool:
         if time.perf_counter() - self.start > self.time_to_pass:
             self.start = time.perf_counter()
@@ -55,9 +58,34 @@ class Animation:
         self.timer = Time(time_between_frames)
         self.current_frame = next(self.frames)
 
+    def get_next_frame(self):
+        self.current_frame = next(self.frames)
+
     def update(self):
         if self.timer.tick():
-            self.current_frame = next(self.frames)
+            self.get_next_frame()
+
+
+class PlayItOnceAnimation(Animation):
+    def __init__(
+        self,
+        frames: t.Sequence[pygame.Surface],
+        time_between_frames: float,
+        pos: t.Sequence,
+    ) -> None:
+        self.n_frames = len(frames)
+        self.pos = pos
+        super().__init__(frames, time_between_frames)
+        self.index = 0
+        self.done = False
+
+    def get_next_frame(self):
+        if self.done:
+            return
+        super().get_next_frame()
+        self.index += 1
+        if self.index == self.n_frames - 1:
+            self.done = True
 
 
 @lru_cache

@@ -19,7 +19,9 @@ class Widget(Protocol):
 
 class Widgets:
     def __init__(self) -> None:
-        self.shared = Shared()
+        self.shared = Shared(
+            slots={PotatoInt: 0, HumanStr: 0, BeeList: 0, PoopyBytes: 0, CentiSet: 0}
+        )
         self.widgets: list[Widget] = []
         self.preview_options: dict[int, list[Widget | str]] = {
             pygame.K_i: [InventoryWidget, "closed"],
@@ -103,7 +105,6 @@ class QuitWidget:
 class InventoryWidget:
     SIZE = 600, 400
     IDEAL_POS = 0, 0
-    SLOTS = {PotatoInt: 0, HumanStr: 0, BeeList: 0, PoopyBytes: 0, CentiSet: 0}
     FONT = get_font("assets/Hack/Hack Bold Nerd Font Complete Mono.ttf", 16)
     ITEM_SPACING = 20
 
@@ -117,7 +118,7 @@ class InventoryWidget:
 
     def gen_image_slots(self):
         index = 0
-        for slot, quantity in InventoryWidget.SLOTS.items():
+        for slot, quantity in self.shared.slots.items():
             surf = pygame.Surface((48, 48))
             surf.fill((40, 40, 40))
             if quantity > 0:

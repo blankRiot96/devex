@@ -11,11 +11,15 @@ from .cursor import CursorState
 class Fireball(Projectile):
     INITIAL_SPEED = 600
     FRAMES = tuple(load_scale_3(f"assets/fireball-anim-{n}.png") for n in range(1, 4))
+    EXPLOSION_FRAMES = tuple(
+        load_scale_3(f"assets/explosion-{n}.png") for n in range(1, 8)
+    )
 
     def __init__(self, radians: float, pos: t.Sequence) -> None:
         super().__init__(radians, Fireball.INITIAL_SPEED)
         self.pos = pygame.Vector2(pos)
         self.deceleration = 200
+        self.damage = 60
 
         self.bloom = Bloom(0.3, wave_speed=0.01, expansion_factor=10)
         self.frames = tuple(

@@ -155,8 +155,10 @@ class BrokenPlatform:
     def __init__(self, side: int, origin: tuple[int, int]) -> None:
         self.origin = origin
         self.side = side
+        self.shared = Shared()
         self.generate_base()
         self.chip_extra_sides()
+        self.get_rect()
         self.generate_enemies()
         self.generate_torches()
         self.done = False
@@ -206,8 +208,11 @@ class BrokenPlatform:
                 block.update()
 
     def update_enemies(self):
-        for enemy in self.enemies:
+        for enemy in self.enemies[:]:
             enemy.update()
+
+            if not enemy.alive:
+                self.enemies.remove(enemy)
 
     def update_torches(self):
         for torch in self.torches:
@@ -219,6 +224,16 @@ class BrokenPlatform:
             self.update_torches()
             self.update_enemies()
         self.done = self.get_done()
+
+    def get_rect(self):
+        self.rect = pygame.Rect(
+            self.blocks[-1][0].pos,
+            (
+                self.side * self.blocks[0][0].rect.width,
+                self.side * self.blocks[0][0].rect.height,
+            ),
+        )
+        self.rect.center = self.blocks[0][0].pos
 
     def draw_blocks(self):
         for row in self.blocks:
@@ -240,13 +255,15 @@ class PlatformManager:
         self.platforms: list[BrokenPlatform] = [
             BrokenPlatform(side=random.randrange(8, 13), origin=(0, 0))
         ]
-        self.current_chunk_index = 0
-        self.shared.current_chunk = self.platforms[self.current_chunk_index]
+        self.shared.current_chunk = self.platforms[0]
         self.done = False
 
     def update_platforms(self):
         for platform in self.platforms:
             platform.update()
+            if platform.rect.colliderect(self.shared.player.rect):
+                self.shared.current_chunk = platform
+
         self.done = all(platform.done for platform in self.platforms)
 
     def create_new_plat(self, torch: Torch, platform: BrokenPlatform):

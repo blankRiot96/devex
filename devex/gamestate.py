@@ -17,11 +17,20 @@ class GameState:
         self.shared.overlay.fill("black")
         self.shared.overlay.set_alpha(150)
         self.shared.provisional_chunk = self.shared.screen.copy()
+        self.shared.play_it_once_anims = []
+
+    def update_anims(self):
+        for anim in self.shared.play_it_once_anims[:]:
+            anim.update()
+
+            if anim.done:
+                self.shared.play_it_once_anims.remove(anim)
 
     def update(self):
         self.shared.camera.attach_to_player()
         self.plat.update()
         self.player.update()
+        self.update_anims()
 
     def draw(self):
         self.shared.overlay.fill("black")
@@ -31,4 +40,9 @@ class GameState:
             self.plat.draw_torches()
             self.shared.screen.blit(
                 self.shared.overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MIN
+            )
+
+        for anim in self.shared.play_it_once_anims:
+            self.shared.screen.blit(
+                anim.current_frame, self.shared.camera.transform(anim.pos)
             )

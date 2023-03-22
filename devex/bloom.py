@@ -11,7 +11,7 @@ def process_bloom(img: pygame.Surface) -> pygame.Surface:
 
 
 class Bloom:
-    IMAGE = pygame.image.load("assets/light_v2.png").convert_alpha()
+    IMAGE = pygame.image.load("assets/light.png").convert_alpha()
     # IMAGE = process_bloom(IMAGE)
 
     def __init__(

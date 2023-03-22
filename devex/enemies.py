@@ -1,6 +1,12 @@
 import pygame
 import random
-from .utils import load_scale_3, iso_to_screen, get_font, SinWave
+from .utils import (
+    load_scale_3,
+    iso_to_screen,
+    get_font,
+    SinWave,
+    PlayItOnceAnimation,
+)
 from abc import ABC
 from .shared import Shared
 import itertools
@@ -20,6 +26,7 @@ class Enemy(ABC):
         tile_rect: pygame.Rect,
         enemy_speed: float,
         origin: tuple[int, int],
+        health: int = 100,
         bouncy_direction: str = "vertical",
     ) -> None:
         self.shared = Shared()
@@ -31,6 +38,8 @@ class Enemy(ABC):
         self.broken_platform_size = broken_platform_size
         self.origin = origin
         self.bouncy_direction = bouncy_direction
+        self.health = health
+        self.alive = True
 
         """
         So, the iso_pos is basically gonna hold a value such as
@@ -53,6 +62,8 @@ class Enemy(ABC):
             self.size = self.image.get_width()
         self.original_size = self.size
         self.bouncy_wave = SinWave(0.06)
+        self.taking_damage = False
+        self.higlight_alpha = 150
 
     def calc_path_range(self) -> None:
         """Calculates the path range for the enemy."""
@@ -70,6 +81,35 @@ class Enemy(ABC):
             return [(self.iso_pos[0], axis) for axis in axis_range_y]
 
         return [(axis, self.iso_pos[1]) for axis in axis_range_x]
+
+    def highlight_red(self):
+        if not self.taking_damage:
+            return
+
+        surf = pygame.Surface(self.image.get_size())
+        surf.fill("red")
+        surf.set_alpha(self.higlight_alpha)
+        self.higlight_alpha -= 100 * self.shared.dt
+        if self.higlight_alpha <= 100:
+            self.taking_damage = False
+            self.higlight_alpha = 150
+        self.image.blit(surf, (0, 0))
+
+    def take_damage(self):
+        for fireball in self.shared.player.fireball_manager.fireballs:
+            if fireball.rect.colliderect(self.rect):
+                fireball.alive = False
+                self.shared.play_it_once_anims.append(
+                    PlayItOnceAnimation(
+                        fireball.EXPLOSION_FRAMES, 0.08, self.pos - (64, 64)
+                    )
+                )
+                self.health -= fireball.damage
+                self.taking_damage = True
+
+        if self.health <= 0:
+            self.alive = False
+            self.shared.slots[type(self)] += 1
 
     def set_font_surf(self):
         self.font_surf = self.font.render(str(self.value), True, self.data_font_color)
@@ -96,6 +136,8 @@ class Enemy(ABC):
     def update(self):
         self.move()
         self.morph_image()
+        self.take_damage()
+        self.highlight_red()
 
     def draw(self):
         self.shared.screen.blit(self.image, self.shared.camera.transform(self.rect))
