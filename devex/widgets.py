@@ -1,11 +1,14 @@
-from typing import Protocol, Sequence, MutableSequence
+import inspect
+from dataclasses import dataclass, field
+from typing import MutableSequence, Protocol, Sequence
+
 import pygame
-from .utils import get_font, render_at, scale_by
-from .shared import Shared
-from .enemies import PotatoInt, BeeList, PoopyBytes, CentiSet, HumanStr
 from logit import log
-from dataclasses import dataclass
+
 from . import game_funcs
+from .enemies import BeeList, CentiSet, HumanStr, PoopyBytes, PotatoInt
+from .shared import Shared
+from .utils import get_font, render_at, scale_by
 
 
 class Widget(Protocol):
@@ -22,7 +25,7 @@ class Widget(Protocol):
 @dataclass
 class Scrollable:
     surf: pygame.Surface
-    pos: pygame.Vector2
+    pos: pygame.Vector2 = field(default_factory=pygame.Vector2)
 
     def __post_init__(self):
         self.original_pos = self.pos.copy()
@@ -84,6 +87,8 @@ class VerticalScrollBar:
         self.scroll_rect.topleft = self.scroll_pos
         self.ratio = self.scroll_pos.y / self.max_scroll_height
 
+        if len(self.scrollables) == 0:
+            return
         self.scrollables[-1].pos.y = (1 - self.ratio) * self.scrollables[
             -1
         ].original_pos.y
@@ -258,16 +263,30 @@ class ProgramWidget:
         self.pos = pos
         self.shared = Shared()
         self.scroll_bar = VerticalScrollBar(self.surf, self.pos, 30, 100, 10)
-        self.gen_test()
+        self.gen_elements()
 
-    def gen_test(self):
-        for i in range(10):
-            self.scroll_bar.add(
-                Scrollable(
-                    self.FONT.render(f"HELLO WORLD {i}", True, "white"),
-                    pygame.Vector2(),
-                )
-            )
+    def gen_elements(self):
+        if self.shared.current_program is None:
+            self.gen_not_found()
+            return
+
+        self.gen_code_element()
+        self.gen_arguments_element()
+        self.gen_execute_element()
+
+    def gen_not_found(self):
+        self.scroll_bar.add(
+            Scrollable(self.FONT.render("No program selected", True, "white"))
+        )
+
+    def gen_code_element(self):
+        ...
+
+    def gen_arguments_element(self):
+        ...
+
+    def gen_execute_element(self):
+        ...
 
     def update(self):
         self.scroll_bar.update()

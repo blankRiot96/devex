@@ -1,14 +1,15 @@
-from .shared import Shared
-from .platform import PlatformManager
 import pygame
-from .player import Player
+
 from .camera import Camera
+from .platform import PlatformManager
+from .player import Player
+from .shared import Shared
 
 
 class GameState:
     def __init__(self) -> None:
         self.next_state = None
-        self.shared = Shared(camera=Camera())
+        self.shared = Shared(camera=Camera(), current_program=None)
         self.origin = pygame.Vector2(100, 150)
         self.plat = PlatformManager()
         self.player = Player(self.origin)

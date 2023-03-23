@@ -1,11 +1,14 @@
 import random
-import pygame
 from enum import Enum, auto
-from .utils import get_font, iso_to_screen, load_scale_3, Time, Animation
-from .bloom import Bloom
-from .shared import Shared
-from .enemies import Enemy, PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet
+
+import pygame
 from logit import log
+
+from .bloom import Bloom
+from .enemies import BeeList, CentiSet, Enemy, HumanStr, PoopyBytes, PotatoInt
+from .program import Code
+from .shared import Shared
+from .utils import Animation, Time, get_font, iso_to_screen, load_scale_3
 
 
 class Block:
@@ -161,7 +164,15 @@ class BrokenPlatform:
         self.get_rect()
         self.generate_enemies()
         self.generate_torches()
+        # TODO: Generate code
+        # self.generate_code()
         self.done = False
+
+    def generate_code(self):
+        self.programs = []
+        for _ in range(random.randrange(2)):
+            self.pos = random.choice(self)
+            self.programs.append(Code)
 
     def generate_torches(self) -> None:
         self.torches: list[Torch] = [
