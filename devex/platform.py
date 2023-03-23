@@ -190,7 +190,7 @@ class BrokenPlatform:
     def chip_extra_sides(self):
         for y, row in tuple(enumerate(self.blocks)):
             for x, block in tuple(enumerate(row)):
-                if random.random() > 0.5:
+                if random.random() > 0.5 or (x == 0 and y == 0):
                     continue
                 if 0 in (x, y) or (self.side - 1) in (x, y):
                     self.blocks[y].remove(block)
@@ -227,7 +227,7 @@ class BrokenPlatform:
 
     def get_rect(self):
         self.rect = pygame.Rect(
-            self.blocks[-1][0].pos,
+            (0, 0),
             (
                 self.side * self.blocks[0][0].rect.width,
                 self.side * self.blocks[0][0].rect.height,

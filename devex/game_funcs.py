@@ -21,6 +21,3 @@ def is_cars_valid(n_cars: int, cars: list[int | str], nth_car: int | str):
 
 def greet(name: str, age: int):
     return f"Hello I'm {name}, {age} years of age."
-
-o = is_cars_valid(3, [3001, 3000, 3003], 0)
-print(o)

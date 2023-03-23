@@ -5,6 +5,7 @@ from .shared import Shared
 from .enemies import PotatoInt, BeeList, PoopyBytes, CentiSet, HumanStr
 from logit import log
 from dataclasses import dataclass
+from . import game_funcs
 
 
 class Widget(Protocol):
@@ -21,21 +22,81 @@ class Widget(Protocol):
 @dataclass
 class Scrollable:
     surf: pygame.Surface
-    pos: MutableSequence
+    pos: pygame.Vector2
+
+    def __post_init__(self):
+        self.original_pos = self.pos.copy()
 
 
 class VerticalScrollBar:
-    def __init__(self) -> None:
+    def __init__(
+        self, surf: pygame.Surface, pos: Sequence, width: int, height: int, padding: int
+    ) -> None:
+        self.shared = Shared()
+        self.surf = surf
+        self.pos = pygame.Vector2(pos)
+        self.rect = self.surf.get_rect(topleft=self.pos)
+        self.padding = padding
         self.scrollables: list[Scrollable] = []
+        self.scroll_rect = pygame.Rect(0, 0, width, height)
+        self.scroll_pos = pygame.Vector2()
+        self.scroll_surf = pygame.Surface(self.scroll_rect.size)
+        self.scroll_surf.fill("grey")
+        self.max_scroll_height = self.surf.get_height() - self.scroll_rect.height
+        self.ratio = 0
+        self.vertical_taken = 0
+        self.selected = False
+        self.first_register = True
+        self.registered_pos = None
+        self.registered_scroll_pos = None
 
     def add(self, scrollable: Scrollable) -> None:
+        scrollable.pos = pygame.Vector2(
+            self.scroll_rect.width + 10,
+            self.vertical_taken + self.padding + scrollable.surf.get_height(),
+        )
+        scrollable.original_pos = scrollable.pos.copy()
+        self.vertical_taken = scrollable.pos.y
         self.scrollables.append(scrollable)
 
+    def on_drag_scrollbar(self):
+        if self.scroll_rect.move(0, self.pos.y).collidepoint(self.shared.cursor.pos):
+            self.scroll_surf.fill((30, 30, 30))
+            self.selected = True
+        else:
+            self.scroll_surf.fill("grey")
+            self.selected = False
+            return
+
+        if self.shared.mouse_press[0]:
+            if self.first_register:
+                self.registered_pos = self.shared.cursor.pos
+                self.registered_scroll_pos = self.scroll_pos.copy()
+                self.first_register = False
+
+            self.scroll_pos.y = self.registered_scroll_pos.y
+            self.scroll_pos.y += self.shared.cursor.pos[1] - self.registered_pos[1]
+        else:
+            self.first_register = True
+
     def update(self):
-        ...
+        self.on_drag_scrollbar()
+        self.scroll_rect.topleft = self.scroll_pos
+        self.ratio = self.scroll_pos.y / self.max_scroll_height
+
+        self.scrollables[-1].pos.y = (1 - self.ratio) * self.scrollables[
+            -1
+        ].original_pos.y
+        for scrollable in self.scrollables[:-1]:
+            scrollable.pos.y = scrollable.original_pos.y
+            scrollable.pos.y += (
+                self.scrollables[-1].pos.y - self.scrollables[-1].original_pos.y
+            )
 
     def draw(self):
-        ...
+        self.surf.blit(self.scroll_surf, self.scroll_pos)
+        for scrollable in self.scrollables:
+            self.surf.blit(scrollable.surf, scrollable.pos)
 
 
 class Widgets:
@@ -188,6 +249,7 @@ class MessageLogWidget:
 class ProgramWidget:
     SIZE = InventoryWidget.SIZE[0], Shared.SCREEN_HEIGHT - InventoryWidget.SIZE[1] - 20
     IDEAL_POS = Shared.SCRECT.bottomleft - pygame.Vector2(0, SIZE[1])
+    FONT = get_font("assets/Hack/Hack Regular Nerd Font Complete Mono.ttf", 25)
 
     def __init__(self, pos) -> None:
         self.surf = pygame.Surface(ProgramWidget.SIZE)
@@ -195,9 +257,22 @@ class ProgramWidget:
         self.surf.set_alpha(150)
         self.pos = pos
         self.shared = Shared()
+        self.scroll_bar = VerticalScrollBar(self.surf, self.pos, 30, 100, 10)
+        self.gen_test()
+
+    def gen_test(self):
+        for i in range(10):
+            self.scroll_bar.add(
+                Scrollable(
+                    self.FONT.render(f"HELLO WORLD {i}", True, "white"),
+                    pygame.Vector2(),
+                )
+            )
 
     def update(self):
-        ...
+        self.scroll_bar.update()
 
     def draw(self):
+        self.surf.fill((60, 60, 60))
+        self.scroll_bar.draw()
         self.shared.screen.blit(self.surf, self.pos)
