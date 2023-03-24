@@ -20,6 +20,7 @@ class Block:
         self.rect = self.img.get_rect()
         self.screen_pos = iso_to_screen(iso_pos, self.rect)
         self.pos = pygame.Vector2(self.screen_pos[0], self.screen_pos[1] + 150)
+        self.rect.topleft = self.pos - (0, 150)
         self.start_timer = Time(random.uniform(0, 3))
         self.done = False
         self.done_waiting = False
@@ -67,7 +68,7 @@ class Torch:
             self.iso_coord, pygame.Rect(0, 0, 32 * 3, 32 * 3)
         )
         self.rect = self.anim.current_frame.get_rect(midbottom=self.screen_coord)
-        self.create_surf = Torch.FONT.render("[+] CREATE", True, "purple", "white")
+        self.create_surf = Torch.FONT.render("[C] CREATE", True, "purple", "white")
         self.create_surf_rect = self.create_surf.get_rect(midbottom=self.rect.midtop)
         self.near = False
         self.used = False
@@ -130,7 +131,7 @@ class Torch:
     def on_create_chunk(self):
         for event in self.shared.events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_EQUALS and self.near:
+                if event.key == pygame.K_c and self.near:
                     self.used = True
 
     def update(self):
@@ -164,15 +165,15 @@ class BrokenPlatform:
         self.get_rect()
         self.generate_enemies()
         self.generate_torches()
-        # TODO: Generate code
-        # self.generate_code()
+        self.generate_code()
         self.done = False
 
     def generate_code(self):
         self.programs = []
-        for _ in range(random.randrange(2)):
-            self.pos = random.choice(self)
-            self.programs.append(Code)
+        for _ in range(random.randrange(1, 3)):
+            block = random.choice(self.blocks[random.randrange(self.side)])
+            self.shared.current_program = Code(block.rect.midtop)
+            self.shared.collected_programs.append(self.shared.current_program)
 
     def generate_torches(self) -> None:
         self.torches: list[Torch] = [
@@ -229,11 +230,19 @@ class BrokenPlatform:
         for torch in self.torches:
             torch.update()
 
+    def update_programs(self):
+        for program in self.programs[:]:
+            program.update()
+
+            if not program.alive:
+                self.programs.remove(program)
+
     def update(self):
         self.update_blocks()
         if self.done:
             self.update_torches()
             self.update_enemies()
+            self.update_programs()
         self.done = self.get_done()
 
     def get_rect(self):
@@ -259,6 +268,10 @@ class BrokenPlatform:
         for torch in self.torches:
             torch.draw()
 
+    def draw_programs(self):
+        for program in self.programs:
+            program.draw()
+
 
 class PlatformManager:
     def __init__(self) -> None:
@@ -266,14 +279,15 @@ class PlatformManager:
         self.platforms: list[BrokenPlatform] = [
             BrokenPlatform(side=random.randrange(8, 13), origin=(0, 0))
         ]
-        self.shared.current_chunk = self.platforms[0]
+        self.shared.current_chunks = [self.platforms[0]]
         self.done = False
 
     def update_platforms(self):
+        self.shared.current_chunks = []
         for platform in self.platforms:
             platform.update()
             if platform.rect.colliderect(self.shared.player.rect):
-                self.shared.current_chunk = platform
+                self.shared.current_chunks.append(platform)
 
         self.done = all(platform.done for platform in self.platforms)
 
@@ -304,6 +318,10 @@ class PlatformManager:
     def draw_torches(self):
         for platform in self.platforms:
             platform.draw_torches()
+
+    def draw_programs(self):
+        for platform in self.platforms:
+            platform.draw_programs()
 
     def draw(self):
         for platform in self.platforms:

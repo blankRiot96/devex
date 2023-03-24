@@ -3,15 +3,19 @@ import pygame
 from .camera import Camera
 from .platform import PlatformManager
 from .player import Player
+from .program import Code
 from .shared import Shared
 
 
 class GameState:
     def __init__(self) -> None:
         self.next_state = None
-        self.shared = Shared(camera=Camera(), current_program=None)
+        self.shared = Shared(
+            camera=Camera(), current_program=None, collected_programs=[]
+        )
         self.origin = pygame.Vector2(100, 150)
         self.plat = PlatformManager()
+        self.shared.plat = self.plat
         self.player = Player(self.origin)
         self.shared.player = self.player
         self.shared.overlay = self.shared.screen.copy()
@@ -39,6 +43,7 @@ class GameState:
         if self.plat.done:
             self.player.draw()
             self.plat.draw_torches()
+            self.plat.draw_programs()
             self.shared.screen.blit(
                 self.shared.overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MIN
             )

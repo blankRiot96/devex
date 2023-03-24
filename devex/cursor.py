@@ -1,7 +1,10 @@
-import pygame
+import itertools
 import math
-from .shared import Shared
 from enum import Enum, auto
+
+import pygame
+
+from .shared import Shared
 from .utils import scale_by
 
 
@@ -97,9 +100,10 @@ class Cursor:
             pass
 
     def on_attack(self):
-        for enemy in self.shared.current_chunk.enemies:
-            if enemy.rect.collidepoint(self.trans_pos):
-                self.state = CursorState.ATTACK
+        for chunk in self.shared.current_chunks:
+            for enemy in chunk.enemies:
+                if enemy.rect.collidepoint(self.trans_pos):
+                    self.state = CursorState.ATTACK
 
     def on_click(self):
         for event in self.shared.events:

@@ -1,16 +1,12 @@
-import pygame
-import random
-from .utils import (
-    load_scale_3,
-    iso_to_screen,
-    get_font,
-    SinWave,
-    PlayItOnceAnimation,
-)
-from abc import ABC
-from .shared import Shared
 import itertools
+import random
 import string
+from abc import ABC
+
+import pygame
+
+from .shared import Shared
+from .utils import PlayItOnceAnimation, SinWave, get_font, iso_to_screen, load_scale_3
 
 
 class Enemy(ABC):
@@ -110,6 +106,8 @@ class Enemy(ABC):
         if self.health <= 0:
             self.alive = False
             self.shared.slots[type(self)] += 1
+            if self.shared.inv_widget is not None:
+                self.shared.inv_widget.construct()
 
     def set_font_surf(self):
         self.font_surf = self.font.render(str(self.value), True, self.data_font_color)

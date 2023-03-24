@@ -1,5 +1,6 @@
 import pygame
 from logit import log
+
 from .shared import Shared
 
 
@@ -14,8 +15,8 @@ class Game:
         from .widgets import Widgets
 
         self.shared.cursor = Cursor()
-        self.shared.widgets = Widgets()
         self.state_manager = StateManager()
+        self.shared.widgets = Widgets()
 
         log.config(rotation_space="5kb")
 

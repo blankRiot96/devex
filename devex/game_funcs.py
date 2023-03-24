@@ -10,7 +10,11 @@ def fibonacci(n: int | float):
     return fibonacci(n - 1) + fibonacci(n - 2)
 
 
-def is_cars_valid(n_cars: int, cars: list[int | str], nth_car: int | str):
+def is_cars_valid(
+    n_cars: int,
+    cars: list[int | str],
+    nth_car: int | str,
+):
     if n_cars == 0:
         return True
 
