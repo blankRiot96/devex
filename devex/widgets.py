@@ -1,12 +1,13 @@
-import inspect
+import itertools
 from dataclasses import dataclass, field
-from typing import MutableSequence, Protocol, Sequence
+from typing import Any, MutableSequence, Protocol, Sequence
 
 import pygame
 from logit import log
 
 from . import game_funcs
 from .camera import Camera
+from .cursor import CursorState
 from .enemies import BeeList, CentiSet, HumanStr, PoopyBytes, PotatoInt
 from .shared import Shared
 from .utils import get_font, render_at, scale_by
@@ -64,7 +65,9 @@ class VerticalScrollBar:
         self.scrollables.append(scrollable)
 
     def on_drag_scrollbar(self):
-        if self.scroll_rect.move(0, self.pos.y).collidepoint(self.shared.cursor.pos):
+        if self.scroll_rect.move(self.pos.x, self.pos.y).collidepoint(
+            self.shared.cursor.pos
+        ):
             self.scroll_surf.fill((30, 30, 30))
             self.selected = True
         else:
@@ -109,6 +112,13 @@ class Widgets:
     def __init__(self) -> None:
         self.shared = Shared(
             slots={PotatoInt: 0, HumanStr: 0, BeeList: 0, PoopyBytes: 0, CentiSet: 0},
+            values={
+                PotatoInt: [],
+                HumanStr: [],
+                BeeList: [],
+                PoopyBytes: [],
+                CentiSet: [],
+            },
             inv_widget=None,
             prg_widget=None,
         )
@@ -172,8 +182,18 @@ class Widgets:
         for event in self.shared.events:
             if event.type == pygame.KEYDOWN:
                 self.preview_widgets(event)
+
+        found = False
         for widget in self.widgets:
             widget.update()
+
+            rect = widget.surf.get_rect(topleft=widget.pos)
+            if rect.collidepoint(self.shared.cursor.pos):
+                self.shared.cursor.state = CursorState.USER_INTERFACE
+                found = True
+
+        if not found:
+            self.shared.cursor.state = CursorState.FORBIDDEN
 
         self.handle_quit()
 
@@ -186,8 +206,8 @@ class QuitWidget:
     def __init__(self, pos: Sequence) -> None:
         self.shared = Shared()
         self.pos = pygame.Vector2(pos)
-        self.surface = pygame.Surface((500, 300))
-        self.surface.set_alpha(150)
+        self.surf = pygame.Surface((500, 300))
+        self.surf.set_alpha(150)
         self.font = get_font("assets/Hack/Hack Regular Nerd Font Complete Mono.ttf", 25)
         self.fill_font()
 
@@ -199,7 +219,7 @@ class QuitWidget:
             True,
             "white",
         )
-        render_at(self.surface, font_surf, "center")
+        render_at(self.surf, font_surf, "center")
 
     def update(self):
         for event in self.shared.events:
@@ -211,7 +231,7 @@ class QuitWidget:
                     self.shared.widgets.remove(self)
 
     def draw(self):
-        render_at(self.shared.screen, self.surface, "center")
+        render_at(self.shared.screen, self.surf, "center")
 
 
 class InventoryWidget:
@@ -340,6 +360,47 @@ class MessageLogWidget:
         self.shared.screen.blit(self.surf, self.pos)
 
 
+class OptionBox:
+    FONT = get_font("assets/Hack/Hack Regular Nerd Font Complete Mono.ttf", 32)
+    colors = {
+        str: "green",
+        bytes: (200, 20, 20),
+        list: "orange",
+        set: "red",
+        int: "blue",
+    }
+
+    def __init__(self, value: Any, enemy_t: Any, width: int, arg) -> None:
+        self.enemy_t = enemy_t
+        self.arg = arg
+        self.value = value
+        self.surf = pygame.Surface((width, self.FONT.get_height()))
+        self.surf.set_alpha(150)
+        self.fill_color_blit(self.colors.get(type(self.value)))
+
+        self.pos = pygame.Vector2()
+        self.rect = self.surf.get_rect(topleft=self.pos)
+        self.shared = Shared()
+
+    def fill_color_blit(self, color, fcolor="white"):
+        self.surf.fill(color)
+        self.surf.blit(self.enemy_t.IMAGE.subsurface(pygame.Rect(0, 0, 48, 48)), (0, 0))
+        self.surf.blit(self.FONT.render(str(self.value), True, fcolor), (60, 0))
+
+    def update(self, drect):
+        self.rect.topleft = drect.topleft + self.pos - (self.rect.width, 0)
+
+        if self.rect.collidepoint(self.shared.cursor.pos):
+            self.fill_color_blit("white", fcolor="black")
+        else:
+            self.fill_color_blit(self.colors.get(type(self.value)))
+        if (
+            self.rect.collidepoint(self.shared.cursor.pos)
+            and self.shared.cursor.clicked
+        ):
+            self.shared.selected_values[self.arg] = self.value
+
+
 class DropBox:
     PADDING = 10
     WIDTH = 100
@@ -347,6 +408,7 @@ class DropBox:
     FONT = get_font("assets/Hack/Hack Regular Nerd Font Complete Mono.ttf", 20)
 
     def __init__(self, arg, surf, n) -> None:
+        self.arg = arg
         self.shared = Shared()
         self.base_surf = surf
         self.srect = surf.get_rect()
@@ -362,12 +424,80 @@ class DropBox:
             self.srect.width - self.surf.get_width(),
             self.n * (self.surf.get_height() + self.PADDING),
         )
+        self.real_rect = self.surf.get_rect(topleft=self.pos)
+        self.options_surf = pygame.Surface((300, 200))
+        self.options_pos = self.srect.topleft
+        # self.options = VerticalScrollBar(
+        #     self.options_surf, self.options_pos, width=20, height=70, padding=10
+        # )
+        self.options = None
 
-    def update(self):
-        ...
+    def construct_arg(self, t):
+        found = False
+        for enemy_t, values in self.shared.values.items():
+            for value in values:
+                same = isinstance(value, t)
+                if same:
+                    found = True
+                    self.options.add(
+                        OptionBox(
+                            value, enemy_t, self.options_surf.get_width(), self.arg
+                        )
+                    )
+
+        if not found:
+            self.options.add(
+                Scrollable(self.FONT.render("No items available.", True, "white"))
+            )
+
+    def construct(self):
+        for arg, t in self.shared.current_program.parameter_data.items():
+            if arg == self.arg:
+                self.construct_arg(t)
+
+    def update(self, pos):
+        if self.options is not None:
+            self.options.pos = pygame.Vector2(self.real_rect.topleft) - (300, 0)
+            self.options.update()
+
+        clicked = False
+        for event in self.shared.events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                clicked = True
+
+        self.real_rect.topleft = (
+            self.pos
+            + pos
+            + (0, InventoryWidget.SIZE[1] + (self.real_rect.height // 2) + 2)
+        )
+        if self.real_rect.collidepoint(self.shared.cursor.pos) and clicked:
+            if self.options is None:
+                self.options = VerticalScrollBar(
+                    self.options_surf,
+                    self.real_rect.topleft,
+                    width=20,
+                    height=70,
+                    padding=10,
+                )
+                self.construct()
+            else:
+                self.options = None
+
+        if self.options is not None:
+            for option in self.options.scrollables:
+                if hasattr(option, "update"):
+                    option.update(self.real_rect)
 
     def draw(self):
+        # (self.shared.screen, "red", self.real_rect, width=3)
         self.base_surf.blit(self.surf, self.pos)
+        self.options_surf.fill((40, 40, 40))
+        if self.options is not None:
+            self.options.draw()
+            self.base_surf.blit(self.options_surf, self.pos - (300, 0))
+            # for option in self.options.scrollables:
+            #     if hasattr(option, "update"):
+            #         pygame.draw.rect(self.shared.screen, "red", option.rect, width=3)
 
 
 class ArgumentsWidget:
@@ -382,17 +512,24 @@ class ArgumentsWidget:
             arg: DropBox(arg, self.surf, n)
             for n, arg in enumerate(self.shared.current_program.parameter_data)
         }
+        self.shared.selected_values = {
+            arg: None for arg in self.shared.current_program.parameter_data
+        }
 
     def update(self):
         for box in self.arg_box.values():
-            box.update()
+            box.update(self.pos)
 
     def draw(self):
         self.surf.fill((60, 60, 60))
 
         index = 0
         for arg, box in self.arg_box.items():
-            surf = self.FONT.render(arg, True, "orange")
+            if self.shared.selected_values.get(arg) is not None:
+                extra = self.shared.selected_values.get(arg)
+            else:
+                extra = "Not selected"
+            surf = self.FONT.render(f"{arg}={extra}", True, "orange")
             self.surf.blit(surf, (10, index * DropBox.HEIGHT))
 
             box.draw()

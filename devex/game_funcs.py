@@ -12,7 +12,7 @@ def fibonacci(n: int | float):
 
 def is_cars_valid(
     n_cars: int,
-    cars: list[int | str],
+    cars: list,
     nth_car: int | str,
 ):
     if n_cars == 0:

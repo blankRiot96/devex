@@ -12,6 +12,7 @@ class CursorState(Enum):
     TOUCHABLE = auto()
     FORBIDDEN = auto()
     ATTACK = auto()
+    USER_INTERFACE = auto()
 
 
 class CursorAnimation:
@@ -65,6 +66,9 @@ class Cursor:
             CursorState.FORBIDDEN: pygame.image.load(
                 "assets/cursor-forbidden.png"
             ).convert_alpha(),
+            CursorState.USER_INTERFACE: pygame.transform.scale(
+                pygame.image.load("assets/cursor-ui.png").convert_alpha(), (25, 25)
+            ),
         }
         pygame.mouse.set_cursor(
             pygame.cursors.Cursor((0, 0), self.images.get(self.state))
@@ -73,6 +77,7 @@ class Cursor:
         self.player_target = None
         self.anim: CursorAnimation | None = None
         self.radians_between_player = 0.0
+        self.clicked = False
 
     @property
     def state(self) -> CursorState:
@@ -92,9 +97,12 @@ class Cursor:
 
     def on_forbidden(self):
         try:
-            if self.shared.provisional_chunk.get_at(self.pos) != self.surface_color:
+            if (
+                self.shared.provisional_chunk.get_at(self.pos) != self.surface_color
+                and self.state != CursorState.USER_INTERFACE
+            ):
                 self.state = CursorState.FORBIDDEN
-            else:
+            elif self.state != CursorState.USER_INTERFACE:
                 self.state = CursorState.TOUCHABLE
         except IndexError:
             pass
@@ -106,6 +114,11 @@ class Cursor:
                     self.state = CursorState.ATTACK
 
     def on_click(self):
+        self.clicked = False
+        for event in self.shared.events:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                self.clicked = True
+
         for event in self.shared.events:
             mouse_clicked = event.type == pygame.MOUSEBUTTONDOWN
             is_touchable = self.state == CursorState.TOUCHABLE

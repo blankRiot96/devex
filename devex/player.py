@@ -1,11 +1,13 @@
-import pygame
 import math
-from .utils import Animation, load_scale_3, Projectile
-from .bloom import Bloom
-from .shared import Shared
-from logit import log
 import typing as t
+
+import pygame
+from logit import log
+
+from .bloom import Bloom
 from .cursor import CursorState
+from .shared import Shared
+from .utils import Animation, Projectile, load_scale_3
 
 
 class Fireball(Projectile):
