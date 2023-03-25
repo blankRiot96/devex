@@ -11,7 +11,11 @@ class GameState:
     def __init__(self) -> None:
         self.next_state = None
         self.shared = Shared(
-            camera=Camera(), current_program=None, collected_programs=[]
+            camera=Camera(),
+            current_program=None,
+            collected_programs=[],
+            gold=0,
+            pyrite=0,
         )
         self.origin = pygame.Vector2(100, 150)
         self.plat = PlatformManager()

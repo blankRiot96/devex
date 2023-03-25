@@ -10,7 +10,7 @@ from .camera import Camera
 from .cursor import CursorState
 from .enemies import BeeList, CentiSet, HumanStr, PoopyBytes, PotatoInt
 from .shared import Shared
-from .utils import get_font, render_at, scale_by
+from .utils import get_font, load_scale_3, render_at
 
 
 class Widget(Protocol):
@@ -124,9 +124,9 @@ class Widgets:
         )
         self.widgets: list[Widget] = []
         self.preview_options: dict[int, list[Widget | str]] = {
-            pygame.K_i: [InventoryWidget, "open"],
+            pygame.K_i: [InventoryWidget, "closed"],
             pygame.K_l: [MessageLogWidget, "closed"],
-            pygame.K_p: [ProgramWidget, "open"],
+            pygame.K_p: [ProgramWidget, "closed"],
             pygame.K_m: [MiniMapWidget, "open"],
         }
         self.construct_widgets()
@@ -168,6 +168,7 @@ class Widgets:
                 return
 
     def construct_widgets(self):
+        self.widgets.clear()
         for option in self.preview_options.values():
             if option[1] == "open":
                 self.add(option[0], option[0].IDEAL_POS)
@@ -239,6 +240,7 @@ class InventoryWidget:
     IDEAL_POS = 0, 0
     FONT = get_font("assets/Hack/Hack Bold Nerd Font Complete Mono.ttf", 16)
     ITEM_SPACING = 20
+    IMAGES = load_scale_3("assets/gold.png"), load_scale_3("assets/pyrite.png")
 
     def __init__(self, pos) -> None:
         self.shared = Shared()
@@ -284,18 +286,21 @@ class InventoryWidget:
         self.surf.blit(title, (20, 10 + self.filled_vertical_space))
         self.filled_vertical_space += title.get_height() + 10
 
-        index = 0
-        for _ in range(2):
+        for index in range(2):
             surf = pygame.Surface((48, 48))
             surf.fill((40, 40, 40))
 
+            surf.blit(self.IMAGES[index], (0, 0))
+            font_surf = self.FONT.render(
+                (str(self.shared.gold), str(self.shared.pyrite))[index], True, "green"
+            )
+            render_at(surf, font_surf, "bottomright")
             x = (surf.get_width() + InventoryWidget.ITEM_SPACING) * index
             x += InventoryWidget.ITEM_SPACING
             y = self.filled_vertical_space
             y += InventoryWidget.ITEM_SPACING
             self.surf.blit(surf, (x, y))
 
-            index += 1
         self.filled_vertical_space += (
             InventoryWidget.ITEM_SPACING + surf.get_height() + 20
         )
@@ -504,7 +509,7 @@ class ArgumentsWidget:
     FONT = get_font("assets/Hack/Hack Regular Nerd Font Complete Mono.ttf", 20)
 
     def __init__(self) -> None:
-        self.surf = pygame.Surface((ProgramWidget.SIZE[0] - 200, 300))
+        self.surf = pygame.Surface((ProgramWidget.SIZE[0] - 200, 200))
         self.surf.fill((60, 60, 60))
         self.shared = Shared()
         self.pos = pygame.Vector2()
@@ -536,6 +541,58 @@ class ArgumentsWidget:
             index += 1
 
 
+class ExecuteButton:
+    SIZE = 120, 40
+    FONT = get_font("assets/Hack/Hack Regular Nerd Font Complete Mono.ttf", 25)
+
+    def __init__(self) -> None:
+        self.surf = pygame.Surface(self.SIZE)
+        self.create_with_color("red")
+        self.pos = pygame.Vector2()
+        self.rect = self.surf.get_rect()
+        self.shared = Shared()
+        self.hover = False
+        self.execute = False
+
+    def create_with_color(self, color):
+        self.surf.fill(color)
+        render_at(self.surf, self.FONT.render("Execute", True, "white"), "center")
+
+    def gen_gold(self):
+        self.shared.current_program.func(**self.shared.selected_values)
+        self.shared.gold += 1
+
+    def gen_pyrite(self):
+        self.shared.pyrite += 1
+
+    def on_execution(self):
+        try:
+            self.gen_gold()
+        except Exception as e:
+            log.debug(e)
+            self.gen_pyrite()
+
+        self.shared.collected_programs.remove(self.shared.current_program)
+        self.shared.current_program = None
+
+        self.shared.widgets.preview_options[pygame.K_p] = [ProgramWidget, "closed"]
+        self.shared.widgets.construct_widgets()
+
+    def update(self):
+        self.rect = self.surf.get_rect(
+            topleft=(30, InventoryWidget.SIZE[1] + 20 + self.pos[1])
+        )
+        self.hover = self.rect.collidepoint(self.shared.cursor.pos)
+        if self.hover:
+            self.create_with_color((255, 100, 100))
+        else:
+            self.create_with_color("red")
+
+        if self.hover and self.shared.cursor.clicked:
+            self.execute = True
+            self.on_execution()
+
+
 class ProgramWidget:
     SIZE = InventoryWidget.SIZE[0], Shared.SCREEN_HEIGHT - InventoryWidget.SIZE[1] - 20
     IDEAL_POS = Shared.SCRECT.bottomleft - pygame.Vector2(0, SIZE[1])
@@ -553,6 +610,7 @@ class ProgramWidget:
         self.surf.fill((60, 60, 60))
         self.scroll_bar = VerticalScrollBar(self.surf, self.pos, 30, 100, 10)
         self.arg_widget = None
+        self.exc_btn = None
         if self.shared.current_program is None:
             self.gen_not_found()
             return
@@ -584,11 +642,16 @@ class ProgramWidget:
         self.scroll_bar.add(self.arg_widget)
 
     def gen_execute_element(self):
-        ...
+        self.exc_btn = ExecuteButton()
+        self.scroll_bar.add(self.exc_btn)
 
     def update(self):
         if self.arg_widget is not None:
             self.arg_widget.update()
+
+        if self.exc_btn is not None:
+            self.exc_btn.update()
+
         self.scroll_bar.update()
 
     def draw(self):

@@ -170,10 +170,9 @@ class BrokenPlatform:
 
     def generate_code(self):
         self.programs = []
-        for _ in range(random.randrange(1, 3)):
+        for _ in range(random.randrange(3)):
             block = random.choice(self.blocks[random.randrange(self.side)])
-            self.shared.current_program = Code(block.rect.midtop)
-            self.shared.collected_programs.append(self.shared.current_program)
+            self.programs.append(Code(block.rect.midbottom))
 
     def generate_torches(self) -> None:
         self.torches: list[Torch] = [
