@@ -19,7 +19,6 @@ class GameState:
         )
         self.origin = pygame.Vector2(100, 150)
         self.plat = PlatformManager()
-        self.shared.plat = self.plat
         self.player = Player(self.origin)
         self.shared.player = self.player
         self.shared.overlay = self.shared.screen.copy()
@@ -51,6 +50,8 @@ class GameState:
             self.shared.screen.blit(
                 self.shared.overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MIN
             )
+        self.player.health_bar.draw()
+        self.player.energy_bar.draw()
 
         for anim in self.shared.play_it_once_anims:
             self.shared.screen.blit(

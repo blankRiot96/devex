@@ -4,6 +4,7 @@ import typing as t
 import pygame
 from logit import log
 
+from .bars import EnergyBar, HealthBar
 from .bloom import Bloom
 from .cursor import CursorState
 from .shared import Shared
@@ -86,8 +87,11 @@ class FireballManager:
 
 
 class Player:
+    MAX_HEALTH = 130
+    MAX_ENERGY = 100
+
     def __init__(self, origin: pygame.Vector2) -> None:
-        self.shared = Shared(mana=0, health=130)
+        self.shared = Shared()
         self.pos = origin.copy()
         self.frames = [load_scale_3(f"assets/player-anim-{n}.png") for n in range(1, 7)]
         self.birby_frames = [
@@ -99,6 +103,16 @@ class Player:
         self.birb_anim = Animation(self.birby_frames, 0.3)
         self.anim = self.idle_anim
         self.fireball_manager = FireballManager()
+        self.health = self.MAX_HEALTH
+        self.mana = 0
+        self.health_bar = HealthBar()
+        self.energy_bar = EnergyBar()
+        self.health_target_vector = pygame.Vector2(self.health, 0)
+        self.health_vector = pygame.Vector2(self.health, 0)
+        self.bar_anim_speed = 15
+
+    def modify_health(self, term: int):
+        self.health_target_vector.x += term
 
     def follow_target(self):
         if self.shared.cursor.player_target is not None:
@@ -125,6 +139,12 @@ class Player:
     def on_shoot(self):
         self.fireball_manager.update()
 
+    def move_towards_health(self):
+        self.health_vector.move_towards_ip(
+            self.health_target_vector, self.bar_anim_speed * self.shared.dt
+        )
+        self.health = self.health_vector.x
+
     def update(self):
         self.anim.update()
 
@@ -132,6 +152,9 @@ class Player:
         self.update_bloom()
         self.on_fly()
         self.on_shoot()
+        self.health_bar.update()
+        self.energy_bar.update()
+        self.move_towards_health()
 
     def draw(self):
         self.shared.screen.blit(

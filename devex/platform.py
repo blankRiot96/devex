@@ -179,13 +179,29 @@ class BrokenPlatform:
             Torch(self.origin, side, self.side) for side in TorchSide
         ]
 
+    def available_enemies(self):
+        enemies = (PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet)
+        level_indeces = {
+            0: 1,
+            1: 1,
+            2: 4,
+            3: 4,
+            4: 5,
+            5: 5,
+            6: 5,
+            7: 5,
+            8: 5,
+            9: 5,
+            10: 5,
+        }
+
+        return enemies[: level_indeces[len(self.shared.plat.platforms)]]
+
     def generate_enemies(self):
         n_enemies = int(self.side / 2.5)
         self.enemies: list[Enemy] = []
         for _ in range(n_enemies):
-            enemy_type = random.choice(
-                (PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet)
-            )
+            enemy_type = random.choice(self.available_enemies())
             self.enemies.append(
                 enemy_type(self.side, self.blocks[1][1].rect, self.origin)
             )
@@ -274,12 +290,16 @@ class BrokenPlatform:
 
 class PlatformManager:
     def __init__(self) -> None:
-        self.shared = Shared()
-        self.platforms: list[BrokenPlatform] = [
-            BrokenPlatform(side=random.randrange(8, 13), origin=(0, 0))
-        ]
+        self.shared = Shared(plat=self)
+        self.platforms: list[BrokenPlatform] = []
+        self.gen_base()
         self.shared.current_chunks = [self.platforms[0]]
         self.done = False
+
+    def gen_base(self):
+        self.platforms.append(
+            BrokenPlatform(side=random.randrange(8, 13), origin=(0, 0))
+        )
 
     def update_platforms(self):
         self.shared.current_chunks = []

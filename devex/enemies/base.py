@@ -5,8 +5,8 @@ from abc import ABC
 
 import pygame
 
-from .shared import Shared
-from .utils import PlayItOnceAnimation, SinWave, get_font, iso_to_screen, load_scale_3
+from devex.shared import Shared
+from devex.utils import PlayItOnceAnimation, SinWave, get_font, iso_to_screen
 
 
 class Enemy(ABC):
@@ -35,6 +35,7 @@ class Enemy(ABC):
         self.origin = origin
         self.bouncy_direction = bouncy_direction
         self.health = health
+        self.max_health = health
         self.alive = True
 
         """
@@ -143,142 +144,3 @@ class Enemy(ABC):
         self.shared.screen.blit(
             self.font_surf, self.shared.camera.transform(self.font_rect)
         )
-
-
-class PotatoInt(Enemy):
-    IMAGE = load_scale_3("assets/integer.png")
-    SPEED = 30
-
-    def __init__(
-        self, broken_platform_size: int, tile_rect: pygame.Rect, origin: tuple[int, int]
-    ) -> None:
-        iso_pos = (
-            random.randrange(2, broken_platform_size - 2) + origin[0],
-            random.randrange(2, broken_platform_size - 2) + origin[1],
-        )
-        super().__init__(
-            int,
-            "pink",
-            PotatoInt.IMAGE,
-            iso_pos,
-            broken_platform_size,
-            tile_rect,
-            PotatoInt.SPEED,
-            origin,
-        )
-
-        self.value = random.choice(
-            (random.randrange(100, 10000), random.randrange(1, 10))
-        )
-        self.set_font_surf()
-
-
-class CentiSet(Enemy):
-    IMAGE = load_scale_3("assets/set.png")
-    SPEED = 25
-
-    def __init__(
-        self, broken_platform_size: int, tile_rect: pygame.Rect, origin: tuple[int, int]
-    ) -> None:
-        iso_pos = (
-            random.randrange(2, broken_platform_size - 2) + origin[0],
-            random.randrange(2, broken_platform_size - 2) + origin[1],
-        )
-        super().__init__(
-            int,
-            "pink",
-            CentiSet.IMAGE,
-            iso_pos,
-            broken_platform_size,
-            tile_rect,
-            CentiSet.SPEED,
-            origin,
-            bouncy_direction="horizontal",
-        )
-
-        self.value = {random.randrange(1, 10) for _ in range(random.randrange(2, 5))}
-        self.set_font_surf()
-
-
-class BeeList(Enemy):
-    IMAGE = load_scale_3("assets/list.png")
-    SPEED = 15
-
-    def __init__(
-        self, broken_platform_size: int, tile_rect: pygame.Rect, origin: tuple[int, int]
-    ) -> None:
-        iso_pos = (
-            random.randrange(2, broken_platform_size - 2) + origin[0],
-            random.randrange(2, broken_platform_size - 2) + origin[1],
-        )
-        super().__init__(
-            int,
-            "pink",
-            BeeList.IMAGE,
-            iso_pos,
-            broken_platform_size,
-            tile_rect,
-            BeeList.SPEED,
-            origin,
-        )
-
-        self.value = [random.randrange(1, 10) for _ in range(random.randrange(2, 5))]
-        self.set_font_surf()
-
-
-class HumanStr(Enemy):
-    IMAGE = load_scale_3("assets/str.png")
-    SPEED = 35
-
-    def __init__(
-        self, broken_platform_size: int, tile_rect: pygame.Rect, origin: tuple[int, int]
-    ) -> None:
-        iso_pos = (
-            random.randrange(2, broken_platform_size - 2) + origin[0],
-            random.randrange(2, broken_platform_size - 2) + origin[1],
-        )
-        super().__init__(
-            int,
-            "pink",
-            HumanStr.IMAGE,
-            iso_pos,
-            broken_platform_size,
-            tile_rect,
-            HumanStr.SPEED,
-            origin,
-        )
-
-        list_str = list(string.ascii_lowercase[: random.randrange(4, 8)])
-        random.shuffle(list_str)
-        list_str = "".join(list_str)
-        self.value = f'"{list_str}"'
-        self.set_font_surf()
-
-
-class PoopyBytes(Enemy):
-    IMAGE = load_scale_3("assets/bytes.png")
-    SPEED = 45
-
-    def __init__(
-        self, broken_platform_size: int, tile_rect: pygame.Rect, origin: tuple[int, int]
-    ) -> None:
-        iso_pos = (
-            random.randrange(2, broken_platform_size - 2) + origin[0],
-            random.randrange(2, broken_platform_size - 2) + origin[1],
-        )
-        super().__init__(
-            int,
-            "pink",
-            PoopyBytes.IMAGE,
-            iso_pos,
-            broken_platform_size,
-            tile_rect,
-            PoopyBytes.SPEED,
-            origin,
-        )
-
-        list_str = list(string.ascii_lowercase[: random.randrange(4, 8)])
-        random.shuffle(list_str)
-        list_str = "".join(list_str)
-        self.value = f'b"{list_str}"'
-        self.set_font_surf()

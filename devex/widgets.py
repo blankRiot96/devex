@@ -1,11 +1,9 @@
-import itertools
 from dataclasses import dataclass, field
-from typing import Any, MutableSequence, Protocol, Sequence
+from typing import Any, Protocol, Sequence
 
 import pygame
 from logit import log
 
-from . import game_funcs
 from .camera import Camera
 from .cursor import CursorState
 from .enemies import BeeList, CentiSet, HumanStr, PoopyBytes, PotatoInt
@@ -150,8 +148,14 @@ class Widgets:
             self.prg_widget = None
         self.widgets.remove(widget)
 
-    def preview_widgets(self, event: pygame.event.Event):
-        option = self.preview_options.get(event.key)
+    def remove_type(self, widget_type):
+        for widget in self.widgets:
+            if isinstance(widget, widget_type):
+                self.widgets.remove(widget)
+                return
+
+    def preview_widgets(self, event_key: int):
+        option = self.preview_options.get(event_key)
         if option is None:
             return
 
@@ -181,7 +185,7 @@ class Widgets:
     def update(self):
         for event in self.shared.events:
             if event.type == pygame.KEYDOWN:
-                self.preview_widgets(event)
+                self.preview_widgets(event.key)
 
         found = False
         for widget in self.widgets:
@@ -340,6 +344,12 @@ class InventoryWidget:
             hover = rect.collidepoint(self.shared.cursor.pos)
             if clicked and hover:
                 self.chosen_index = index
+                self.shared.widgets.remove_type(ProgramWidget)
+                self.shared.widgets.preview_options[pygame.K_p] = [
+                    ProgramWidget,
+                    "closed",
+                ]
+                self.shared.widgets.preview_widgets(pygame.K_p)
                 self.construct()
 
     def draw(self):
@@ -402,7 +412,10 @@ class OptionBox:
             self.rect.collidepoint(self.shared.cursor.pos)
             and self.shared.cursor.clicked
         ):
-            self.shared.values[self.enemy_t].remove(self.value)
+            try:
+                self.shared.values[self.enemy_t].remove(self.value)
+            except ValueError:
+                pass
             if self.shared.selected_values.get(self.arg) is not None:
                 self.shared.values[self.enemy_t].append(
                     self.shared.selected_values.get(self.arg)

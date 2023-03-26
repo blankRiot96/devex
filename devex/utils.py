@@ -1,9 +1,10 @@
-import pygame
-import typing as t
-from functools import lru_cache
-import time
 import itertools
 import math
+import time
+import typing as t
+from functools import lru_cache
+
+import pygame
 
 
 class Projectile:
