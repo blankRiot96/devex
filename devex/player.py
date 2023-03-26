@@ -87,7 +87,7 @@ class FireballManager:
 
 class Player:
     def __init__(self, origin: pygame.Vector2) -> None:
-        self.shared = Shared()
+        self.shared = Shared(mana=0, health=130)
         self.pos = origin.copy()
         self.frames = [load_scale_3(f"assets/player-anim-{n}.png") for n in range(1, 7)]
         self.birby_frames = [

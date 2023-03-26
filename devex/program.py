@@ -35,7 +35,9 @@ class Code:
         for event in self.shared.events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f and self.near:
-                    self.shared.collected_programs.append(self)
+                    if len(self.shared.collected_programs) < 6:
+                        self.shared.collected_programs.append(self)
+                    # else: LOG MESSAGE
                     if self.shared.inv_widget is not None:
                         self.shared.inv_widget.construct()
                     self.alive = False

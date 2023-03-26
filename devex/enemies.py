@@ -105,7 +105,6 @@ class Enemy(ABC):
 
         if self.health <= 0:
             self.alive = False
-            self.shared.slots[type(self)] += 1
             self.shared.values[type(self)].append(self.value)
 
             if self.shared.inv_widget is not None:

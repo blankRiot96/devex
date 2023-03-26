@@ -111,7 +111,6 @@ class VerticalScrollBar:
 class Widgets:
     def __init__(self) -> None:
         self.shared = Shared(
-            slots={PotatoInt: 0, HumanStr: 0, BeeList: 0, PoopyBytes: 0, CentiSet: 0},
             values={
                 PotatoInt: [],
                 HumanStr: [],
@@ -262,12 +261,12 @@ class InventoryWidget:
         self.surf.blit(title, (20, 10 + self.filled_vertical_space))
         self.filled_vertical_space += title.get_height() + 10
         index = 0
-        for slot, quantity in self.shared.slots.items():
+        for enemy_t, values in self.shared.values.items():
             surf = pygame.Surface((48, 48))
             surf.fill((40, 40, 40))
-            if quantity > 0:
-                surf.blit(slot.IMAGE, (0, 0))
-                font_surf = self.FONT.render(str(quantity), True, "yellow")
+            if len(values) > 0:
+                surf.blit(enemy_t.IMAGE, (0, 0))
+                font_surf = self.FONT.render(str(len(values)), True, "yellow")
                 render_at(surf, font_surf, "bottomright")
 
             x = (surf.get_width() + InventoryWidget.ITEM_SPACING) * index
@@ -403,6 +402,11 @@ class OptionBox:
             self.rect.collidepoint(self.shared.cursor.pos)
             and self.shared.cursor.clicked
         ):
+            self.shared.values[self.enemy_t].remove(self.value)
+            if self.shared.selected_values.get(self.arg) is not None:
+                self.shared.values[self.enemy_t].append(
+                    self.shared.selected_values.get(self.arg)
+                )
             self.shared.selected_values[self.arg] = self.value
 
 
