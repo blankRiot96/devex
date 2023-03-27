@@ -176,27 +176,32 @@ class BrokenPlatform:
             self.programs.append(Code(block.rect.midbottom))
 
     def generate_torches(self) -> None:
+        if len(self.shared.plat.platforms) == 10:
+            return
         self.torches: list[Torch] = [
             Torch(self.origin, side, self.side) for side in TorchSide
         ]
 
-    def available_enemies(self):
-        enemies = (PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet)
-        level_indeces = {
-            0: 1,
-            1: 1,
-            2: 4,
-            3: 4,
-            4: 5,
-            5: 5,
-            6: 5,
-            7: 5,
-            8: 5,
-            9: 5,
-            10: 5,
-        }
+    # def available_enemies(self):
+    #     enemies = (PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet)
+    #     level_indeces = {
+    #         0: 1,
+    #         1: 1,
+    #         2: 4,
+    #         3: 4,
+    #         4: 5,
+    #         5: 5,
+    #         6: 5,
+    #         7: 5,
+    #         8: 5,
+    #         9: 5,
+    #         10: 5,
+    #     }
 
-        return enemies[: level_indeces[len(self.shared.plat.platforms)]]
+    #     return enemies[: level_indeces[len(self.shared.plat.platforms)]]
+
+    def available_enemies(self):
+        return (CentiSet, BeeList)
 
     def generate_enemies(self):
         n_enemies = int(self.side / 2.5)
