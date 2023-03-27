@@ -3,8 +3,8 @@ import pygame
 from .camera import Camera
 from .platform import PlatformManager
 from .player import Player
-from .program import Code
 from .shared import Shared
+from .ss_manager import ScreenShakeManager
 
 
 class GameState:
@@ -17,6 +17,7 @@ class GameState:
             gold=0,
             pyrite=0,
         )
+        self.screen_shake_manager = ScreenShakeManager()
         self.origin = pygame.Vector2(100, 150)
         self.plat = PlatformManager()
         self.player = Player(self.origin)
@@ -38,6 +39,7 @@ class GameState:
         self.shared.camera.attach_to_player()
         self.plat.update()
         self.player.update()
+        self.screen_shake_manager.update()
         self.update_anims()
 
     def draw(self):

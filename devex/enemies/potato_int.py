@@ -10,7 +10,7 @@ from devex.utils import Projectile, Time, load_scale_3
 
 class Tater(Projectile):
     IMAGES = tuple(load_scale_3(f"assets/potato-{n}.png") for n in range(1, 4))
-    SPEED = 100
+    SPEED = 120
     DAMAGE = 2.5
     RANGE = 300
 
@@ -40,6 +40,7 @@ class Tater(Projectile):
 
         if self.rect.colliderect(self.shared.player.rect):
             self.shared.player.modify_health(-self.DAMAGE)
+            self.shared.ss.add(0.5, 2.0)
             self.alive = False
 
         if self.distance_travelled > self.RANGE:
@@ -52,7 +53,7 @@ class Tater(Projectile):
 class PotatoInt(Enemy):
     IMAGE = load_scale_3("assets/integer.png")
     SPEED = 30
-    SENSE_RANGE = 300
+    SENSE_RANGE = 500
 
     def __init__(
         self, broken_platform_size: int, tile_rect: pygame.Rect, origin: tuple[int, int]
@@ -77,7 +78,7 @@ class PotatoInt(Enemy):
         )
         self.set_font_surf()
         self.potatos: list[Tater] = []
-        self.potato_cooldown = Time(2)
+        self.potato_cooldown = Time(2.0)
 
     def start_condition(self):
         return self.health < self.max_health

@@ -8,7 +8,7 @@ from .bars import EnergyBar, HealthBar
 from .bloom import Bloom
 from .cursor import CursorState
 from .shared import Shared
-from .utils import Animation, Projectile, load_scale_3
+from .utils import Animation, Projectile, Time, load_scale_3
 
 
 class Fireball(Projectile):
@@ -56,18 +56,30 @@ class FireballManager:
     def __init__(self) -> None:
         self.fireballs: set[Fireball] = set()
         self.shared = Shared()
+        self.cooldown = Time(0.6)
+        self.creatable = True
 
     def on_create(self):
         if self.shared.cursor.state != CursorState.ATTACK:
             return
+
+        if not self.creatable:
+            if self.cooldown.tick():
+                self.creatable = True
         for event in self.shared.events:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if (
+                event.type == pygame.MOUSEBUTTONDOWN
+                and event.button == 1
+                and self.creatable
+            ):
                 self.fireballs.add(
                     Fireball(
                         self.shared.cursor.radians_between_player,
                         self.shared.player.pos,
                     )
                 )
+                self.creatable = False
+                self.cooldown.reset()
 
     def retain_active_fireballs(self):
         for fireball in set(self.fireballs):
@@ -109,7 +121,7 @@ class Player:
         self.energy_bar = EnergyBar()
         self.health_target_vector = pygame.Vector2(self.health, 0)
         self.health_vector = pygame.Vector2(self.health, 0)
-        self.bar_anim_speed = 15
+        self.bar_anim_speed = 3
 
     def modify_health(self, term: int):
         self.health_target_vector.x += term
@@ -140,10 +152,14 @@ class Player:
         self.fireball_manager.update()
 
     def move_towards_health(self):
+        self.bar_anim_speed += 3.3
         self.health_vector.move_towards_ip(
             self.health_target_vector, self.bar_anim_speed * self.shared.dt
         )
         self.health = self.health_vector.x
+
+        if self.health_vector == self.health_target_vector:
+            self.bar_anim_speed = 3
 
     def update(self):
         self.anim.update()

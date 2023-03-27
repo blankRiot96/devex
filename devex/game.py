@@ -30,6 +30,7 @@ class Game:
         self.shared.events = pygame.event.get()
         self.shared.mouse_press = pygame.mouse.get_pressed()
         self.shared.dt = self.clock.tick() / 1000
+        self.shared.dt = min(self.shared.dt, 0.1)
 
         self.shared.cursor.update()
         self.state_manager.update()

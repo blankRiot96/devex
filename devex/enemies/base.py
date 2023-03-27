@@ -92,17 +92,19 @@ class Enemy(ABC):
             self.higlight_alpha = 200
         self.image.blit(surf, (0, 0))
 
+    def on_damage(self, fireball):
+        fireball.alive = False
+        self.shared.play_it_once_anims.append(
+            PlayItOnceAnimation(fireball.EXPLOSION_FRAMES, 0.08, self.pos - (64, 64))
+        )
+        self.health -= fireball.damage
+        self.taking_damage = True
+        self.shared.ss.add(1.0, 1.5)
+
     def take_damage(self):
         for fireball in self.shared.player.fireball_manager.fireballs:
             if fireball.rect.colliderect(self.rect):
-                fireball.alive = False
-                self.shared.play_it_once_anims.append(
-                    PlayItOnceAnimation(
-                        fireball.EXPLOSION_FRAMES, 0.08, self.pos - (64, 64)
-                    )
-                )
-                self.health -= fireball.damage
-                self.taking_damage = True
+                self.on_damage(fireball)
 
         if self.health <= 0:
             self.alive = False

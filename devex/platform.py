@@ -167,6 +167,7 @@ class BrokenPlatform:
         self.generate_torches()
         self.generate_code()
         self.done = False
+        self.regen_cooldown = Time(30.0)
 
     def generate_code(self):
         self.programs = []
@@ -252,12 +253,22 @@ class BrokenPlatform:
             if not program.alive:
                 self.programs.remove(program)
 
+    def on_regen(self):
+        if self.enemies:
+            self.regen_cooldown.reset()
+            return
+
+        if not self.enemies and self.regen_cooldown.tick():
+            self.generate_enemies()
+            self.generate_code()
+
     def update(self):
         self.update_blocks()
         if self.done:
             self.update_torches()
             self.update_enemies()
             self.update_programs()
+            self.on_regen()
         self.done = self.get_done()
 
     def get_rect(self):
