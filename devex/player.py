@@ -1,4 +1,3 @@
-import math
 import typing as t
 
 import pygame
@@ -6,96 +5,9 @@ from logit import log
 
 from .bars import EnergyBar, HealthBar
 from .bloom import Bloom
-from .cursor import CursorState
+from .player_attacks import EAttack, FireballManager, QAttack, WAttack
 from .shared import Shared
-from .utils import Animation, Projectile, Time, load_scale_3
-
-
-class Fireball(Projectile):
-    INITIAL_SPEED = 600
-    FRAMES = tuple(load_scale_3(f"assets/fireball-anim-{n}.png") for n in range(1, 4))
-    EXPLOSION_FRAMES = tuple(
-        load_scale_3(f"assets/explosion-{n}.png") for n in range(1, 8)
-    )
-
-    def __init__(self, radians: float, pos: t.Sequence) -> None:
-        super().__init__(radians, Fireball.INITIAL_SPEED)
-        self.pos = pygame.Vector2(pos)
-        self.deceleration = 200
-        self.damage = 60
-
-        self.bloom = Bloom(0.3, wave_speed=0.01, expansion_factor=10)
-        self.frames = tuple(
-            pygame.transform.rotate(frame, math.degrees(-self.radians))
-            for frame in Fireball.FRAMES
-        )
-        self.anim = Animation(self.frames, 0.2)
-        self.rect = Fireball.FRAMES[0].get_rect()
-        self.alive = True
-        self.shared = Shared()
-
-    def update(self):
-        self.anim.update()
-        self.bloom.update(self.shared.camera.transform(self.pos))
-        self.get_delta_velocity(self.shared.dt)
-        self.pos += self.dv
-        self.speed -= self.deceleration * self.shared.dt
-        self.rect.center = self.pos
-
-        if self.speed < 100:
-            self.alive = False
-
-    def draw(self):
-        self.shared.screen.blit(
-            self.anim.current_frame, self.shared.camera.transform(self.rect)
-        )
-        self.bloom.draw(self.shared.overlay)
-
-
-class FireballManager:
-    def __init__(self) -> None:
-        self.fireballs: set[Fireball] = set()
-        self.shared = Shared()
-        self.cooldown = Time(0.6)
-        self.creatable = True
-
-    def on_create(self):
-        if self.shared.cursor.state != CursorState.ATTACK:
-            return
-
-        if not self.creatable:
-            if self.cooldown.tick():
-                self.creatable = True
-        for event in self.shared.events:
-            if (
-                event.type == pygame.MOUSEBUTTONDOWN
-                and event.button == 1
-                and self.creatable
-            ):
-                self.fireballs.add(
-                    Fireball(
-                        self.shared.cursor.radians_between_player,
-                        self.shared.player.pos,
-                    )
-                )
-                self.creatable = False
-                self.cooldown.reset()
-
-    def retain_active_fireballs(self):
-        for fireball in set(self.fireballs):
-            if not fireball.alive:
-                self.fireballs.remove(fireball)
-
-    def update(self):
-        self.on_create()
-        self.retain_active_fireballs()
-
-        for fireball in self.fireballs:
-            fireball.update()
-
-    def draw(self):
-        for fireball in self.fireballs:
-            fireball.draw()
+from .utils import Animation, load_scale_3
 
 
 class Player:
@@ -122,6 +34,8 @@ class Player:
         self.health_target_vector = pygame.Vector2(self.health, 0)
         self.health_vector = pygame.Vector2(self.health, 0)
         self.bar_anim_speed = 3
+
+        self.q_attack = QAttack()
 
     def modify_health(self, term: int):
         self.health_target_vector.x += term
@@ -171,6 +85,7 @@ class Player:
         self.health_bar.update()
         self.energy_bar.update()
         self.move_towards_health()
+        self.q_attack.update()
 
     def draw(self):
         self.shared.screen.blit(
@@ -178,3 +93,4 @@ class Player:
         )
         self.bloom.draw(self.shared.overlay)
         self.fireball_manager.draw()
+        self.q_attack.draw()

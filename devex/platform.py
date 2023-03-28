@@ -5,7 +5,16 @@ import pygame
 from logit import log
 
 from .bloom import Bloom
-from .enemies import BeeList, CentiSet, Enemy, HumanStr, PoopyBytes, PotatoInt
+from .enemies import (
+    BeeList,
+    CentiSet,
+    Enemy,
+    FinalBoss,
+    HumanStr,
+    PoopyBytes,
+    PotatoInt,
+    ShroomDict,
+)
 from .program import Code
 from .shared import Shared
 from .utils import Animation, Time, get_font, iso_to_screen, load_scale_3
@@ -156,6 +165,8 @@ class Torch:
 class BrokenPlatform:
     """A platform with a random spec"""
 
+    MAX_PLATFORMS = 9
+
     def __init__(self, side: int, origin: tuple[int, int]) -> None:
         self.origin = origin
         self.side = side
@@ -166,46 +177,65 @@ class BrokenPlatform:
         self.generate_enemies()
         self.generate_torches()
         self.generate_code()
+        self.generate_boss()
         self.done = False
         self.regen_cooldown = Time(30.0)
 
     def generate_code(self):
         self.programs = []
+        if len(self.shared.plat.platforms) >= self.MAX_PLATFORMS:
+            return
         for _ in range(random.randrange(3)):
             block = random.choice(self.blocks[random.randrange(self.side)])
             self.programs.append(Code(block.rect.midbottom))
 
     def generate_torches(self) -> None:
-        if len(self.shared.plat.platforms) == 10:
+        self.torches = []
+        if len(self.shared.plat.platforms) >= self.MAX_PLATFORMS:
             return
         self.torches: list[Torch] = [
             Torch(self.origin, side, self.side) for side in TorchSide
         ]
 
-    # def available_enemies(self):
-    #     enemies = (PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet)
-    #     level_indeces = {
-    #         0: 1,
-    #         1: 1,
-    #         2: 4,
-    #         3: 4,
-    #         4: 5,
-    #         5: 5,
-    #         6: 5,
-    #         7: 5,
-    #         8: 5,
-    #         9: 5,
-    #         10: 5,
-    #     }
+    def generate_boss(self):
+        if len(self.shared.plat.platforms) != self.MAX_PLATFORMS:
+            return
 
-    #     return enemies[: level_indeces[len(self.shared.plat.platforms)]]
+        self.shared.final_boss = FinalBoss(
+            self.side, self.blocks[1][1].rect, self.origin
+        )
+        for platform in self.shared.plat.platforms:
+            platform.enemies = []
 
     def available_enemies(self):
-        return (CentiSet, BeeList)
+        enemies = (PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet, ShroomDict)
+        level_indeces = {
+            0: 1,
+            1: 1,
+            2: 4,
+            3: 4,
+            4: 5,
+            5: 5,
+            6: 5,
+            7: 6,
+            8: 6,
+            9: 6,
+            10: 6,
+        }
+
+        return enemies[: level_indeces[len(self.shared.plat.platforms)]]
+
+    # def available_enemies(self):
+    #     return (ShroomDict,)
+
+    # def available_enemies(self):
+    #     return (PotatoInt, HumanStr, PoopyBytes, BeeList, CentiSet, ShroomDict)
 
     def generate_enemies(self):
-        n_enemies = int(self.side / 2.5)
         self.enemies: list[Enemy] = []
+        if len(self.shared.plat.platforms) >= self.MAX_PLATFORMS:
+            return
+        n_enemies = int(self.side / 2.5)
         for _ in range(n_enemies):
             enemy_type = random.choice(self.available_enemies())
             self.enemies.append(

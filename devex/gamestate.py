@@ -16,6 +16,7 @@ class GameState:
             collected_programs=[],
             gold=0,
             pyrite=0,
+            final_boss=None,
         )
         self.screen_shake_manager = ScreenShakeManager()
         self.origin = pygame.Vector2(100, 150)
@@ -42,6 +43,9 @@ class GameState:
         self.screen_shake_manager.update()
         self.update_anims()
 
+        if self.shared.final_boss is not None and self.plat.done:
+            self.shared.final_boss.update()
+
     def draw(self):
         self.shared.overlay.fill("black")
         self.plat.draw()
@@ -49,13 +53,21 @@ class GameState:
             self.player.draw()
             self.plat.draw_torches()
             self.plat.draw_programs()
-            self.shared.screen.blit(
-                self.shared.overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MIN
-            )
+            if self.shared.final_boss is None:
+                self.shared.screen.blit(
+                    self.shared.overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MIN
+                )
         self.player.health_bar.draw()
         self.player.energy_bar.draw()
+        self.player.q_attack.draw_front()
 
         for anim in self.shared.play_it_once_anims:
+            if hasattr(anim, "draw"):
+                anim.draw()
+                continue
             self.shared.screen.blit(
                 anim.current_frame, self.shared.camera.transform(anim.pos)
             )
+
+        if self.shared.final_boss is not None and self.plat.done:
+            self.shared.final_boss.draw()

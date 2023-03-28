@@ -113,6 +113,12 @@ class Cursor:
                 if enemy.rect.collidepoint(self.trans_pos):
                     self.state = CursorState.ATTACK
 
+        if (
+            self.shared.final_boss is not None
+            and self.shared.final_boss.rect.collidepoint(self.trans_pos)
+        ):
+            self.state = CursorState.ATTACK
+
     def on_click(self):
         self.clicked = False
         for event in self.shared.events:

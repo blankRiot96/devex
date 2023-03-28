@@ -22,7 +22,7 @@ class CentiSet(Enemy):
         )
         super().__init__(
             int,
-            "pink",
+            "red",
             CentiSet.IMAGE,
             iso_pos,
             broken_platform_size,

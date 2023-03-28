@@ -69,7 +69,10 @@ class Sword:
 
         self.rect.topleft = self.pos
 
-        if self.rect.colliderect(self.shared.player.rect):
+        if (
+            self.aim_rect.colliderect(self.shared.player.rect)
+            and self.rect.bottom >= self.target.y
+        ):
             self.shared.player.modify_health(-self.damage)
             self.active = False
 

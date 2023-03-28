@@ -22,7 +22,7 @@ class PoopyBytes(Enemy):
         )
         super().__init__(
             int,
-            "pink",
+            "purple",
             PoopyBytes.IMAGE,
             iso_pos,
             broken_platform_size,

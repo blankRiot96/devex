@@ -71,7 +71,7 @@ class HumanStr(Enemy):
         )
         super().__init__(
             int,
-            "pink",
+            "springgreen",
             HumanStr.IMAGE,
             iso_pos,
             broken_platform_size,

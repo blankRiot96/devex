@@ -4,6 +4,7 @@ import string
 from abc import ABC
 
 import pygame
+from logit import log
 
 from devex.shared import Shared
 from devex.utils import PlayItOnceAnimation, SinWave, get_font, iso_to_screen
@@ -61,6 +62,7 @@ class Enemy(ABC):
         self.bouncy_wave = SinWave(0.06)
         self.taking_damage = False
         self.higlight_alpha = 200
+        self.highlight_reduction_speed = 100
 
     def calc_path_range(self) -> None:
         """Calculates the path range for the enemy."""
@@ -86,7 +88,7 @@ class Enemy(ABC):
         surf = pygame.Surface(self.image.get_size())
         surf.fill("red")
         surf.set_alpha(self.higlight_alpha)
-        self.higlight_alpha -= 100 * self.shared.dt
+        self.higlight_alpha -= self.highlight_reduction_speed * self.shared.dt
         if self.higlight_alpha <= 120:
             self.taking_damage = False
             self.higlight_alpha = 200
@@ -108,7 +110,10 @@ class Enemy(ABC):
 
         if self.health <= 0:
             self.alive = False
-            self.shared.values[type(self)].append(self.value)
+            try:
+                self.shared.values[type(self)].append(self.value)
+            except KeyError as e:
+                log.debug(e)
 
             if self.shared.inv_widget is not None:
                 self.shared.inv_widget.construct()
@@ -131,8 +136,10 @@ class Enemy(ABC):
         self.size = self.original_size + (self.bouncy_wave.val() * 5)
         if self.bouncy_direction == "vertical":
             new_size = self.original_image.get_width(), self.size
-        else:
+        elif self.bouncy_direction == "horizontal":
             new_size = self.size, self.original_image.get_height()
+        else:
+            return
         self.image = pygame.transform.scale(self.original_image, new_size)
 
     def update(self):

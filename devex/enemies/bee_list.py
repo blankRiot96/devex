@@ -22,7 +22,7 @@ class BeeList(Enemy):
         )
         super().__init__(
             int,
-            "pink",
+            "orange",
             BeeList.IMAGE,
             iso_pos,
             broken_platform_size,

@@ -6,7 +6,7 @@ from logit import log
 
 from .camera import Camera
 from .cursor import CursorState
-from .enemies import BeeList, CentiSet, HumanStr, PoopyBytes, PotatoInt
+from .enemies import BeeList, CentiSet, HumanStr, PoopyBytes, PotatoInt, ShroomDict
 from .shared import Shared
 from .utils import get_font, load_scale_3, render_at
 
@@ -115,6 +115,7 @@ class Widgets:
                 BeeList: [],
                 PoopyBytes: [],
                 CentiSet: [],
+                ShroomDict: []
             },
             inv_widget=None,
             prg_widget=None,
