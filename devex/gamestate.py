@@ -14,7 +14,7 @@ class GameState:
             camera=Camera(),
             current_program=None,
             collected_programs=[],
-            gold=0,
+            gold=4,
             pyrite=0,
             final_boss=None,
         )
@@ -60,6 +60,8 @@ class GameState:
         self.player.health_bar.draw()
         self.player.energy_bar.draw()
         self.player.q_attack.draw_front()
+        self.player.w_attack.draw_front()
+        self.player.e_attack.draw_front()
 
         for anim in self.shared.play_it_once_anims:
             if hasattr(anim, "draw"):

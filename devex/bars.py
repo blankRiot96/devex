@@ -67,6 +67,8 @@ class EnergyBar:
         self.foreground_surf = self.original_foreground_surf.copy()
         self.size = self.BAR_SIZE
 
+        self.mana_boost = 3
+
     def update(self):
         self.size = (
             self.shared.player.mana / self.shared.player.MAX_ENERGY
@@ -79,6 +81,7 @@ class EnergyBar:
             pygame.Rect(0, 0, *self.size),
             border_radius=7,
         )
+        self.shared.player.modify_mana(self.mana_boost * self.shared.dt)
 
     def draw(self):
         render_at(self.shared.screen, self.background_surf, "midtop", (0, 50))

@@ -1,17 +1,18 @@
 import itertools
 import random
-import string
 from abc import ABC
 
 import pygame
 from logit import log
 
 from devex.shared import Shared
-from devex.utils import PlayItOnceAnimation, SinWave, get_font, iso_to_screen
+from devex.utils import PlayItOnceAnimation, SinWave, TimeOnce, get_font, iso_to_screen
 
 
 class Enemy(ABC):
     font = get_font("assets/Hack/Hack Bold Nerd Font Complete.ttf", 16)
+    KILL_TIME_TO_PASS = 3.0
+    KILL_BOOST = 5
 
     def __init__(
         self,
@@ -63,6 +64,7 @@ class Enemy(ABC):
         self.taking_damage = False
         self.higlight_alpha = 200
         self.highlight_reduction_speed = 100
+        self.boost_timer: TimeOnce = None
 
     def calc_path_range(self) -> None:
         """Calculates the path range for the enemy."""
@@ -103,12 +105,24 @@ class Enemy(ABC):
         self.taking_damage = True
         self.shared.ss.add(1.0, 1.5)
 
+    def give_mana_boost(self):
+        if self.shared.player.boost_timer is None:
+            self.shared.player.boost_timer = TimeOnce(self.KILL_TIME_TO_PASS)
+        self.shared.player.boost_timer.time_to_pass = self.KILL_TIME_TO_PASS
+        self.shared.player.modify_mana(self.KILL_BOOST)
+        self.shared.player.on_boost = True
+
     def take_damage(self):
         for fireball in self.shared.player.fireball_manager.fireballs:
             if fireball.rect.colliderect(self.rect):
                 self.on_damage(fireball)
 
+        for fireball in self.shared.player.e_attack.fireballs:
+            if fireball.rect.colliderect(self.rect):
+                self.on_damage(fireball)
+
         if self.health <= 0:
+            self.give_mana_boost()
             self.alive = False
             try:
                 self.shared.values[type(self)].append(self.value)

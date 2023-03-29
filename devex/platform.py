@@ -165,7 +165,7 @@ class Torch:
 class BrokenPlatform:
     """A platform with a random spec"""
 
-    MAX_PLATFORMS = 9
+    MAX_PLATFORMS = 1
 
     def __init__(self, side: int, origin: tuple[int, int]) -> None:
         self.origin = origin

@@ -136,6 +136,14 @@ def render_at(
     base_surf.blit(surf, surf_rect)
 
 
+def aura_load(path: str, opacity: int = 100) -> pygame.Surface:
+    surf = pygame.image.load(path).convert_alpha()
+    surf = scale_by(surf, 2)
+    surf.set_alpha(opacity)
+
+    return surf
+
+
 def iso_to_screen(iso_pos: t.Sequence, tile_rect: pygame.Rect) -> t.Sequence:
     """Converts isometric position to screen space"""
 
