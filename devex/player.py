@@ -11,7 +11,7 @@ from .utils import Animation, aura_load, load_scale_3
 
 
 class Player:
-    MAX_HEALTH = 130
+    MAX_HEALTH = 300
     MAX_ENERGY = 100
     FRAMES = tuple(aura_load(f"assets/boost-aura-{n}.png") for n in range(1, 4))
 

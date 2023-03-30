@@ -45,7 +45,7 @@ class BeeList(Enemy):
 
         if self.start_condition():
             self.sword = Sword(
-                1,
+                0,
                 15,
                 self.shared.player.pos
                 + (random.uniform(-30, 30), random.uniform(-30, 30)),

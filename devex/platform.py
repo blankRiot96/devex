@@ -165,7 +165,7 @@ class Torch:
 class BrokenPlatform:
     """A platform with a random spec"""
 
-    MAX_PLATFORMS = 1
+    MAX_PLATFORMS = 9
 
     def __init__(self, side: int, origin: tuple[int, int]) -> None:
         self.origin = origin
@@ -180,6 +180,9 @@ class BrokenPlatform:
         self.generate_boss()
         self.done = False
         self.regen_cooldown = Time(30.0)
+        self.shared.messages.append(
+            f"PLATFORM {len(self.shared.plat.platforms) + 1} created"
+        )
 
     def generate_code(self):
         self.programs = []
@@ -293,7 +296,11 @@ class BrokenPlatform:
             self.regen_cooldown.reset()
             return
 
-        if not self.enemies and self.regen_cooldown.tick():
+        if (
+            not self.enemies
+            and self.regen_cooldown.tick()
+            and len(self.shared.plat.platforms) > 1
+        ):
             self.generate_enemies()
             self.generate_code()
 

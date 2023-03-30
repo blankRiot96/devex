@@ -234,7 +234,8 @@ class LevelUpButton:
             else:
                 self.shared.gold -= self.ai.gold_to_upgrade
             self.ai.level += 1
-            self.shared.widgets.construct_widgets()
+            if self.shared.inv_widget is not None:
+                self.shared.inv_widget.construct()
 
         if self.has_enough_gold():
             self.image.set_alpha(255)
@@ -469,7 +470,7 @@ class WAttack:
     def __init__(self) -> None:
         self.shared = Shared()
         self.active = False
-        self.initial_cd = 30.0
+        self.initial_cd = 15.0
         self.attack_info = AttackInfo(
             self.initial_cd, attack_key=pygame.K_w, gold_to_unlock=3, mana_cost=15
         )
@@ -506,9 +507,8 @@ class WAttack:
 
     def update_level(self):
         self.attack_info.cooldown.time_to_pass = self.initial_cd - (
-            self.attack_info.level / 2
+            (self.attack_info.level / 2)
         )
-        self.cooldown.time_to_pass = self.initial_attack_cd + self.attack_info.level
 
     def update(self):
         self.attack_info.update()

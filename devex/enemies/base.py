@@ -126,8 +126,9 @@ class Enemy(ABC):
             self.alive = False
             try:
                 self.shared.values[type(self)].append(self.value)
+                self.shared.messages.append(f"Gained 1 {self.data_type.__name__}")
             except KeyError as e:
-                log.debug(e)
+                ...
 
             if self.shared.inv_widget is not None:
                 self.shared.inv_widget.construct()

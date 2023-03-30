@@ -69,7 +69,7 @@ class FinalBoss(Enemy):
             tile_rect=tile_rect,
             enemy_speed=100,
             origin=origin,
-            health=5_000,
+            health=1_500,
             bouncy_direction=None,
         )
 

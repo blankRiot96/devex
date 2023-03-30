@@ -10,13 +10,9 @@ class Game:
         self.shared = Shared()
         self.win_init()
 
-        from .cursor import Cursor
         from .states import StateManager
-        from .widgets import Widgets
 
-        self.shared.cursor = Cursor()
         self.state_manager = StateManager()
-        self.shared.widgets = Widgets()
 
         log.config(rotation_space="5kb")
 
@@ -32,15 +28,11 @@ class Game:
         self.shared.dt = self.clock.tick() / 1000
         self.shared.dt = min(self.shared.dt, 0.1)
 
-        self.shared.cursor.update()
         self.state_manager.update()
-        self.shared.widgets.update()
 
     def _draw(self):
         self.shared.screen.fill("black")
         self.state_manager.draw()
-        self.shared.cursor.draw()
-        self.shared.widgets.draw()
 
         pygame.display.flip()
 

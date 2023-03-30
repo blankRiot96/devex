@@ -107,7 +107,16 @@ class VerticalScrollBar:
 
 
 class Widgets:
-    def __init__(self) -> None:
+    def __init__(self, style: str = "game") -> None:
+        self.style = style
+        if style == "game":
+            self.init_game()
+        elif style == "gameover":
+            self.init_gameover()
+        self.widgets: list[Widget] = []
+        self.construct_widgets()
+
+    def init_game(self):
         self.shared = Shared(
             values={
                 PotatoInt: [],
@@ -115,19 +124,21 @@ class Widgets:
                 BeeList: [],
                 PoopyBytes: [],
                 CentiSet: [],
-                ShroomDict: []
+                ShroomDict: [],
             },
             inv_widget=None,
             prg_widget=None,
         )
-        self.widgets: list[Widget] = []
         self.preview_options: dict[int, list[Widget | str]] = {
             pygame.K_i: [InventoryWidget, "closed"],
-            pygame.K_l: [MessageLogWidget, "closed"],
+            pygame.K_l: [MessageLogWidget, "open"],
             pygame.K_p: [ProgramWidget, "closed"],
             pygame.K_m: [MiniMapWidget, "open"],
         }
-        self.construct_widgets()
+
+    def init_gameover(self):
+        self.shared = Shared()
+        self.preview_options = {}
 
     def add(self, widget: Widget, pos: Sequence):
         if widget == InventoryWidget:
@@ -192,13 +203,15 @@ class Widgets:
         for widget in self.widgets:
             widget.update()
 
-            rect = widget.surf.get_rect(topleft=widget.pos)
-            if rect.collidepoint(self.shared.cursor.pos):
-                self.shared.cursor.state = CursorState.USER_INTERFACE
-                found = True
+            if self.style == "game":
+                rect = widget.surf.get_rect(topleft=widget.pos)
+                if rect.collidepoint(self.shared.cursor.pos):
+                    self.shared.cursor.state = CursorState.USER_INTERFACE
+                    found = True
 
-        if not found:
-            self.shared.cursor.state = CursorState.FORBIDDEN
+        if self.style == "game":
+            if not found:
+                self.shared.cursor.state = CursorState.FORBIDDEN
 
         self.handle_quit()
 
@@ -231,6 +244,7 @@ class QuitWidget:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
+                    # pygame.image.save(self.shared.provisional_chunk, "prov.png")
                     raise SystemExit
                 elif event.key == pygame.K_RETURN:
                     self.shared.widgets.remove(self)
@@ -252,6 +266,7 @@ class InventoryWidget:
         self.surf.set_alpha(150)
         self.pos = pygame.Vector2(pos)
         self.chosen_index = None
+        self.conv_btn = ConvertButton()
         self.construct()
 
     def construct(self):
@@ -337,6 +352,7 @@ class InventoryWidget:
             self.surf.blit(surf, (x, y))
 
     def update(self):
+        self.conv_btn.update()
         clicked = False
         for event in self.shared.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -355,11 +371,14 @@ class InventoryWidget:
 
     def draw(self):
         self.shared.screen.blit(self.surf, self.pos)
+        self.conv_btn.draw()
 
 
 class MessageLogWidget:
     SIZE = 400, 400
     IDEAL_POS = Shared.SCRECT.bottomright - pygame.Vector2(SIZE)
+    FONT = get_font("assets/Hack/Hack Bold Nerd Font Complete Mono.ttf", 16)
+    MESSAGES = []
 
     def __init__(self, pos) -> None:
         self.shared = Shared()
@@ -367,11 +386,31 @@ class MessageLogWidget:
         self.surf.fill((60, 60, 60))
         self.surf.set_alpha(150)
         self.pos = pygame.Vector2(pos)
+        self.bar = VerticalScrollBar(self.surf, self.pos, 20, 100, padding=7)
+
+        for message in MessageLogWidget.MESSAGES:
+            self.bar.add(Scrollable(self.FONT.render(message, True, "white")))
+
+        self.last_len = len(MessageLogWidget.MESSAGES)
 
     def update(self):
-        ...
+        self.bar.update()
+
+        if self.last_len != len(MessageLogWidget.MESSAGES):
+            self.bar.add(
+                Scrollable(
+                    self.FONT.render(MessageLogWidget.MESSAGES[-1], True, "white")
+                )
+            )
+        if len(MessageLogWidget.MESSAGES) > 30:
+            MessageLogWidget.MESSAGES.pop(0)
+            self.bar.scrollables.pop(0)
+
+        self.last_len = len(MessageLogWidget.MESSAGES)
 
     def draw(self):
+        self.surf.fill((60, 60, 60))
+        self.bar.draw()
         self.shared.screen.blit(self.surf, self.pos)
 
 
@@ -579,9 +618,11 @@ class ExecuteButton:
     def gen_gold(self):
         self.shared.current_program.func(**self.shared.selected_values)
         self.shared.gold += 1
+        self.shared.messages.append("Gained 1 gold")
 
     def gen_pyrite(self):
         self.shared.pyrite += 1
+        self.shared.messages.append("Gained 1 pyrite")
 
     def on_execution(self):
         try:
@@ -719,3 +760,34 @@ class MiniMapWidget:
             self.render_platform(platform)
 
         self.shared.screen.blit(self.surf, self.pos)
+
+
+class ConvertButton:
+    FONT = get_font("assets/Hack/Hack Regular Nerd Font Complete Mono.ttf", 16)
+
+    def __init__(self) -> None:
+        self.surf = pygame.Surface((100, 20))
+        self.surf.fill("red")
+        self.pos = (150, 180)
+        self.rect = self.surf.get_rect(topleft=self.pos)
+        self.shared = Shared()
+        self.font_surf = self.FONT.render("Convert", True, "white")
+        self.font_rect = self.font_surf.get_rect(center=self.rect.center)
+
+    def update(self):
+        if self.rect.collidepoint(self.shared.cursor.pos):
+            hover = True
+            self.surf.fill("orange")
+        else:
+            hover = False
+            self.surf.fill("red")
+
+        if hover and self.shared.cursor.clicked and self.shared.pyrite >= 3:
+            self.shared.gold += 1
+            self.shared.pyrite -= 3
+            self.shared.messages.append("Traded 3 pyrite for 1 gold")
+            self.shared.inv_widget.construct()
+
+    def draw(self):
+        self.shared.screen.blit(self.surf, self.rect)
+        self.shared.screen.blit(self.font_surf, self.font_rect)
