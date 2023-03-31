@@ -2,7 +2,6 @@ import random
 from enum import Enum, auto
 
 import pygame
-from logit import log
 
 from .bloom import Bloom
 from .enemies import (

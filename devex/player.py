@@ -1,7 +1,6 @@
 import typing as t
 
 import pygame
-from logit import log
 
 from .bars import EnergyBar, HealthBar
 from .bloom import Bloom

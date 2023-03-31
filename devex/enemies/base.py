@@ -3,7 +3,6 @@ import random
 from abc import ABC
 
 import pygame
-from logit import log
 
 from devex.shared import Shared
 from devex.utils import PlayItOnceAnimation, SinWave, TimeOnce, get_font, iso_to_screen

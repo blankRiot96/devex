@@ -6,7 +6,6 @@ import time
 import typing as t
 
 import pygame
-from logit import log
 
 from .bloom import Bloom
 from .cursor import CursorState

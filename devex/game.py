@@ -1,5 +1,4 @@
 import pygame
-from logit import log
 
 from .shared import Shared
 
@@ -13,8 +12,6 @@ class Game:
         from .states import StateManager
 
         self.state_manager = StateManager()
-
-        log.config(rotation_space="5kb")
 
     def win_init(self):
         self.shared.screen = pygame.display.set_mode(

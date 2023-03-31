@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol, Sequence
 
 import pygame
-from logit import log
 
 from .camera import Camera
 from .cursor import CursorState
@@ -632,7 +631,6 @@ class ExecuteButton:
         try:
             self.gen_gold()
         except Exception as e:
-            log.debug(e)
             self.gen_pyrite()
 
         self.shared.collected_programs.remove(self.shared.current_program)
