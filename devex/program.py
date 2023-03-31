@@ -1,4 +1,3 @@
-import inspect
 import random
 
 import pygame
@@ -10,14 +9,15 @@ from .utils import get_font, scale_by
 
 
 class Code:
-    FUNCS = tuple(m for m in dir(game_funcs) if not m.startswith("__"))
+    FUNCS = list(m for m in dir(game_funcs) if not m.startswith("__"))
+    FUNCS.remove("sources")
     IMAGE = pygame.image.load("assets/code.png").convert_alpha()
     IMAGE = scale_by(IMAGE, 0.025)
     FONT = get_font("assets/Hack/Hack Regular Nerd Font Complete Mono.ttf", 16)
 
     def __init__(self, pos) -> None:
         self.func = getattr(game_funcs, random.choice(Code.FUNCS))
-        self.code_text = inspect.getsource(self.func)
+        self.get_source()
         self.parameter_data = self.func.__annotations__
         self.pos = pygame.Vector2(pos)
         self.shared = Shared()
@@ -27,6 +27,9 @@ class Code:
         self.pickup_rect = self.pickup_surf.get_rect(midbottom=self.rect.midtop)
         self.near = False
         self.alive = True
+
+    def get_source(self):
+        self.code_text = game_funcs.sources[self.func]
 
     def check_near(self):
         self.near = self.shared.player.rect.colliderect(self.rect)

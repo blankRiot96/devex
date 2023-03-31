@@ -1,5 +1,7 @@
 import typing as t
 
+import pygame
+
 from .gameoverstate import GameOverState
 from .gamestate import GameState
 from .menustate import MenuState
@@ -21,6 +23,8 @@ class StateLike(t.Protocol):
 class StateManager:
     def __init__(self) -> None:
         self.__state_enum = State.MENU
+        pygame.mixer.music.load("assets/Ringside - Dyalla.mp3")
+        pygame.mixer.music.play(-1, fade_ms=5000)
         self.state_dict: dict[State, StateLike] = {
             State.MENU: MenuState,
             State.TUTORIAL: TutorialState,
@@ -38,6 +42,21 @@ class StateManager:
     def state_enum(self, next_state: State) -> None:
         self.__state_enum = next_state
         self.state_obj: StateLike = self.state_dict.get(self.__state_enum)()
+
+        if next_state == State.MENU:
+            pygame.mixer.music.load("assets/Ringside - Dyalla.mp3")
+            pygame.mixer.music.play(-1, fade_ms=5000)
+        elif next_state == State.GAME:
+            pygame.mixer.music.load("assets/Soulicious - Dyalla.mp3")
+            pygame.mixer.music.play(-1, fade_ms=5000)
+        elif next_state == State.GAME_OVER:
+            pygame.mixer.music.load("assets/Goddess of the Sea - Jimena Contreras.mp3")
+            pygame.mixer.music.play(-1, fade_ms=5000)
+        elif next_state == State.VICTORY:
+            pygame.mixer.music.load("assets/Put It - TrackTribe.mp3")
+            pygame.mixer.music.play(-1)
+        elif next_state == State.TUTORIAL:
+            pygame.mixer.music.stop()
 
     def update(self):
         self.state_obj.update()

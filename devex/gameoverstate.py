@@ -15,12 +15,18 @@ class PreviewLastGame:
         self.overlay = pygame.Surface(Shared.SCRECT.size)
 
         self.pics: list[pygame.Surface] = itertools.cycle(self.shared.gameplay_pics)
-        self.current_pic = next(self.pics)
+        try:
+            self.current_pic = next(self.pics)
+        except:
+            self.current_pic = pygame.Surface(Shared.SCRECT.size)
         self.timer = Time(5.0)
 
     def update(self):
         if self.timer.tick():
-            self.current_pic = next(self.pics)
+            try:
+                self.current_pic = next(self.pics)
+            except:
+                self.current_pic = pygame.Surface(Shared.SCRECT.size)
 
     def draw(self):
         self.shared.screen.blit(pygame.transform.grayscale(self.current_pic), (0, 0))
