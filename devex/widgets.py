@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass, field
 from typing import Any, Protocol, Sequence
 
@@ -422,6 +423,7 @@ class OptionBox:
         list: "orange",
         set: "red",
         int: "blue",
+        dict: "springgreen",
     }
 
     def __init__(self, value: Any, enemy_t: Any, width: int, arg) -> None:
@@ -617,12 +619,14 @@ class ExecuteButton:
 
     def gen_gold(self):
         self.shared.current_program.func(**self.shared.selected_values)
-        self.shared.gold += 1
-        self.shared.messages.append("Gained 1 gold")
+        gold_gained = random.randrange(1, 8)
+        self.shared.gold += gold_gained
+        self.shared.messages.append(f"Gained {gold_gained} gold")
 
     def gen_pyrite(self):
-        self.shared.pyrite += 1
-        self.shared.messages.append("Gained 1 pyrite")
+        gained = random.randrange(3, 15)
+        self.shared.pyrite += gained
+        self.shared.messages.append(f"Gained {gained} pyrite")
 
     def on_execution(self):
         try:

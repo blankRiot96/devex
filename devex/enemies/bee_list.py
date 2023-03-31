@@ -29,6 +29,7 @@ class BeeList(Enemy):
             tile_rect,
             BeeList.SPEED,
             origin,
+            health=300,
         )
 
         self.value = [random.randrange(1, 10) for _ in range(random.randrange(2, 5))]
@@ -46,7 +47,7 @@ class BeeList(Enemy):
         if self.start_condition():
             self.sword = Sword(
                 0,
-                15,
+                30,
                 self.shared.player.pos
                 + (random.uniform(-30, 30), random.uniform(-30, 30)),
             )

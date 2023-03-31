@@ -4,6 +4,7 @@ from .gameoverstate import GameOverState
 from .gamestate import GameState
 from .menustate import MenuState
 from .state_enums import State
+from .tutorialstate import TutorialState
 from .victorystate import VictoryState
 
 
@@ -21,8 +22,9 @@ class StateManager:
     def __init__(self) -> None:
         self.__state_enum = State.MENU
         self.state_dict: dict[State, StateLike] = {
-            State.GAME: GameState,
             State.MENU: MenuState,
+            State.TUTORIAL: TutorialState,
+            State.GAME: GameState,
             State.GAME_OVER: GameOverState,
             State.VICTORY: VictoryState,
         }

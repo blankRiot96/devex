@@ -87,8 +87,11 @@ class MenuState:
         self.shared.widgets.update()
 
         for event in self.shared.events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                self.next_state = State.GAME
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    self.next_state = State.GAME
+                elif event.key == pygame.K_t:
+                    self.next_state = State.TUTORIAL
 
         self.bg.update()
         self.dash.update()

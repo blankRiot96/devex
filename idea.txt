@@ -1,0 +1,38 @@
+
+-> The objective of the game is to defeat the final boss.
+
+-> To do so, the two most important things are health and gold.
+
+-> You cannot heal yourself in this game, so preserving your health is very important
+
+-> To gain gold, you execute programs that you can find in new platforms. 
+    -> View your inventory using the `I` key
+    -> You can pick and choose arguments for your program that match the data type annotated in the code.
+    -> But be careful! The other developers may be trying to fool you...
+    -> When and if your program fails you execute, you get pyrite(fool's gold.)
+    -> You can trade 3 pyrite for 1 gold using the `convert` button.
+
+-> To create new platforms you need to put out a torch using the `C` key. A new platform is created in that direction.
+    -> TIP: Try creating a circular structure of platforms, this is easy to deal with when the final boss spawns.
+
+-> To move to a particular location, left click with your mouse to where you want to go.
+    -> You can also fly across platforms in this manner.
+
+-> You can attack enemies by hovering over them and using your mouse to right click.
+
+-> The final boss spawns once you have created 15 platforms.
+
+-> To combat the final boss, 3 main attacks are available to you which consumes mana.
+    -> Your mana increases over time, and you get mana boosts when you kill enemies.
+
+-> The first attack, namely 'Hotball' requires 6 gold to unlock, which you can do by pressing the Up button.
+    -> You can launch this special fireball using the `Q` key, and it blasts all the surrounding enemies.
+    -> This does nothing if you are too far away from the target location on launching it.
+
+-> The second attack, namely 'Shield' requires 3 gold to unlock, this is the optimal choice to start with.
+    -> This lets you have immunity for a few seconds.
+
+-> The third attack, namely 'HellRing' requires 4 gold to unlock, this creates a ring of fireballs around you.
+    -> The number of fireballs increase with its level.
+
+

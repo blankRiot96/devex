@@ -2,7 +2,8 @@ from enum import Enum, auto
 
 
 class State(Enum):
-    GAME = auto()
     MENU = auto()
+    TUTORIAL = auto()
+    GAME = auto()
     GAME_OVER = auto()
     VICTORY = auto()

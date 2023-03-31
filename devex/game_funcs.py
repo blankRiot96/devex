@@ -88,25 +88,6 @@ def calculate_statistics(data: list | int | bytes):
     return mean, median, mode, std_dev
 
 
-def get_student_grade_report(students: dict | set):
-    grade_report = {}
-    for student, grades in students.items():
-        average_grade = sum(grades) / len(grades)
-        letter_grade = (
-            "A"
-            if average_grade >= 90
-            else "B"
-            if average_grade >= 80
-            else "C"
-            if average_grade >= 70
-            else "D"
-            if average_grade >= 60
-            else "F"
-        )
-        grade_report[student] = (average_grade, letter_grade)
-    return grade_report
-
-
 def get_filtered_values(values: list | tuple):
     filtered_values = []
     for value in values:
@@ -115,3 +96,118 @@ def get_filtered_values(values: list | tuple):
         elif isinstance(value, str) and value.startswith("a"):
             filtered_values.append(value)
     return filtered_values
+
+
+# 20 funcs
+def add_3(n: int | bytes):
+    return n + 3
+
+
+def byte_to_code(data: bytes | int | str):
+    d = data.decode()
+    return d
+
+
+def byte_logic(data: bytes | int | str):
+    d = data.decode()
+    d += "potato"
+    d = d * 3
+    return d
+
+
+def byte_sunday(data: bytes | int | str):
+    found = False
+    for char in data.decode():
+        if char == "s":
+            found = True
+
+    return found
+
+
+def parse_string(text: str, stop: int):
+    for i, char in enumerate(text):
+        if i == stop:
+            break
+        if char == "(":
+            return text[i : i + 1]
+    return text
+
+
+def bubble_sort(arr: list | int | bytes):
+    n = len(arr)
+    swapped = False
+    for i in range(n - 1):
+        for j in range(0, n - i - 1):
+            if arr[j] > arr[j + 1]:
+                swapped = True
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+
+        if not swapped:
+            return
+
+
+def is_palindrome(text: str | set | bytes):
+    return text == text[::-1]
+
+
+def is_pal_int(num: int | str):
+    temp = num
+    reverse = 0
+    while temp > 0:
+        remainder = temp % 10
+        reverse = (reverse * 10) + remainder
+        temp = temp // 10
+
+    return temp == num
+
+
+def get_filtered_union(set_a: set | list | str, set_b: set | int | bytes):
+    not_required = {3, 4, 5}
+
+    for e in set(set_a):
+        if e in not_required:
+            set_a.remove(e)
+
+    for e in set(set_b):
+        if e in not_required:
+            set_b.remove(e)
+
+    return set_a.union(set_b)
+
+
+def get_filtered_intersection(set_a: set | list | tuple, set_b: set | str | int):
+    not_required = {1, 3, 5}
+
+    for e in set(set_a):
+        if e in not_required:
+            set_a.remove(e)
+
+    for e in set(set_b):
+        if e in not_required:
+            set_b.remove(e)
+
+    return set_a.intersection(set_b)
+
+
+def get_reflexive_pairs(set_a: set, set_b: set):
+    pairs = {}
+    for a, b in zip(set_a, set_b):
+        pairs.add((a, b))
+    return pairs
+
+
+def sum_dict_values(d: dict | set) -> int:
+    """Return the sum of all values in a dictionary."""
+    return sum(d.values())
+
+
+def invert_dict(d: dict | list | int):
+    """Return a new dictionary with the keys and values of the input
+    dictionary swapped."""
+    return {v: k for k, v in d.items()}
+
+
+def sort_dict_by_values(d: dict | str | bytes):
+    """Return a list of tuples containing the key-value pairs of the
+    input dictionary, sorted by their values."""
+    return sorted(d.items(), key=lambda x: x[1])

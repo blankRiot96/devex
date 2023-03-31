@@ -380,8 +380,9 @@ class QAttack:
         self.active = False
         self.fireballs: list[Fireball] = []
         self.attack_info = AttackInfo(
-            3.0, attack_key=pygame.K_q, gold_to_unlock=6, mana_cost=60
+            15.0, attack_key=pygame.K_q, gold_to_unlock=6, mana_cost=60
         )
+        self.ottp = self.attack_info.cooldown.time_to_pass
 
     def add_fireball(self, enemy):
         self.attack_info.used = False
@@ -445,6 +446,7 @@ class QAttack:
 
     def update_level(self):
         HotBall.MAX_FIREBALLS = HotBall.INITIAL_MAX_FIREBALLS + self.attack_info.level
+        self.attack_info.cooldown.time_to_pass = self.ottp - self.attack_info.level
 
     def update(self):
         self.attack_info.update()
@@ -477,7 +479,7 @@ class WAttack:
         self.registered_health = 0
         self.anim = Animation(self.FRAMES, 0.1)
         self.rect = self.FRAMES[0].get_rect()
-        self.initial_attack_cd = 6.0
+        self.initial_attack_cd = 3.0
         self.cooldown = TimeOnce(self.initial_attack_cd)
 
         self.shield_rect = self.SHIELD.get_rect()

@@ -11,7 +11,7 @@ from devex.utils import Projectile, Time, load_scale_3
 class Spore(Projectile):
     INITIAL_SPEED = 100
     IMAGE = load_scale_3("assets/spore.png")
-    DEATH_SPEED = 150
+    DEATH_SPEED = 100
     DAMAGE = 10
 
     def __init__(self, radians, pos) -> None:
@@ -47,7 +47,7 @@ class SporeManager:
 
     def __init__(self) -> None:
         self.spores: list[Spore] = []
-        self.cooldown = Time(3.0)
+        self.cooldown = Time(1.5)
 
     def create_spore_batch(self, pos):
         base_rad = (2 * math.pi) / self.SPORES_PER_BATCH
@@ -71,7 +71,7 @@ class SporeManager:
 class ShroomDict(Enemy):
     IMAGE = load_scale_3("assets/dict.png")
     SPEED = 120
-    SENSE_RANGE = 300
+    SENSE_RANGE = 600
 
     def __init__(
         self, broken_platform_size: int, tile_rect: pygame.Rect, origin: tuple[int, int]

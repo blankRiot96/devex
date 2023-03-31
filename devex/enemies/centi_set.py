@@ -30,6 +30,7 @@ class CentiSet(Enemy):
             CentiSet.SPEED,
             origin,
             bouncy_direction="horizontal",
+            health=400,
         )
 
         self.value = {random.randrange(1, 10) for _ in range(random.randrange(2, 5))}
@@ -47,7 +48,7 @@ class CentiSet(Enemy):
         if self.start_condition():
             self.sword = Sword(
                 1,
-                30,
+                60,
                 self.shared.player.pos
                 + (random.uniform(-30, 30), random.uniform(-30, 30)),
             )

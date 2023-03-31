@@ -11,8 +11,8 @@ from devex.utils import Projectile, Time, get_font, load_scale_3
 
 class Alphabet(Projectile):
     SPEED = 140
-    DAMAGE = 4.5
-    RANGE = 250
+    DAMAGE = 8.5
+    RANGE = 600
     FONT = get_font("assets/Hack/Hack Bold Nerd Font Complete Mono.ttf", 40)
 
     def __init__(self, pos) -> None:
@@ -78,6 +78,7 @@ class HumanStr(Enemy):
             tile_rect,
             HumanStr.SPEED,
             origin,
+            health=140,
         )
 
         list_str = list(string.ascii_lowercase[: random.randrange(4, 8)])

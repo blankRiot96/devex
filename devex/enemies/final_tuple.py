@@ -76,13 +76,13 @@ class FinalBoss(Enemy):
         self.value = tuple(random.randrange(1, 256) for _ in range(4))
         self.set_font_surf()
         self.health_bar = HealthBar(self.health)
-        self.heal_timer = Time(3.0)
+        self.heal_timer = Time(10.0)
         self.attack_timer = Time(20.0)
         self.healing = False
         self.current_attacks = [self.throw_fireballs, self.heavenly_swords]
 
         self.fb_timer = Time(4.0)
-        self.spread_timer = Time(6.0)
+        self.spread_timer = Time(2.0)
         self.fireballs: list[Fireball] = []
 
         self.sword = None
@@ -155,7 +155,7 @@ class FinalBoss(Enemy):
             self.fb_timer.reset()
             self.spread_timer.reset()
 
-        self.health += 50 * self.shared.dt
+        self.health += 150 * self.shared.dt
         if self.health > self.max_health:
             self.health = self.max_health
 

@@ -42,7 +42,7 @@ class GameState:
         # Info for game over/victory state
         self.shared.start_time = time.time()
         self.shared.gameplay_pics: list[pygame.Surface] = []
-        self.pic_timer = Time(3.0)
+        self.pic_timer = Time(30.0)
 
     def update_anims(self):
         for anim in self.shared.play_it_once_anims[:]:
