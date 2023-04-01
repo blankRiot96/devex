@@ -34,7 +34,7 @@ def get_screen_size_wasm():
 class Shared:
     _inst = None
 
-    # Constants
+    Constants
     if sys.platform == "win32":
         SCREEN_WIDTH, SCREEN_HEIGHT = get_screen_size_win()
     elif "linux" in sys.platform:
@@ -45,6 +45,7 @@ class Shared:
         raise EnvironmentError("Game only supported in Windows and Linux.")
 
     SCRECT = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+
     screen: pygame.Surface
     overlay: pygame.Surface
 

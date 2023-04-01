@@ -1,3 +1,5 @@
+import asyncio
+
 import pygame
 
 from .shared import Shared
@@ -33,12 +35,14 @@ class Game:
 
         pygame.display.flip()
 
-    def run(self):
+    async def run(self):
         while True:
             self._update()
             self._draw()
 
+            await asyncio.sleep(0)
+
 
 def main():
     game = Game()
-    game.run()
+    asyncio.run(game.run())
