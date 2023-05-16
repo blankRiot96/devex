@@ -33,6 +33,7 @@ class Sword:
     INITIAL_SPEED = 100
     ORIGINAL_AIM_IMAGE = pygame.image.load("assets/attack_area.png").convert_alpha()
     ORIGINAL_AIM_IMAGE = scale_by(ORIGINAL_AIM_IMAGE, 0.3)
+    BOOM_SFX = pygame.mixer.Sound("assets/explosion.wav")
 
     def __init__(
         self, image_index: int, damage: int, target_pos: pygame.Vector2
@@ -80,6 +81,7 @@ class Sword:
             self.active = False
 
     def on_done(self):
+        self.BOOM_SFX.play()
         self.shared.ss.add(1.5, 3.0)
         self.shared.play_it_once_anims.append(DeathAnimation(self.target))
         self.alive = False

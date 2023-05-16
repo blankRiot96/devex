@@ -12,6 +12,7 @@ class Enemy(ABC):
     font = get_font("assets/Hack/Hack Bold Nerd Font Complete.ttf", 16)
     KILL_TIME_TO_PASS = 3.0
     KILL_BOOST = 5
+    ON_DAMAGE_SFX = pygame.mixer.Sound("assets/fireball.wav")
 
     def __init__(
         self,
@@ -96,6 +97,7 @@ class Enemy(ABC):
         self.image.blit(surf, (0, 0))
 
     def on_damage(self, fireball):
+        self.ON_DAMAGE_SFX.play()
         fireball.alive = False
         self.shared.play_it_once_anims.append(
             PlayItOnceAnimation(fireball.EXPLOSION_FRAMES, 0.08, self.pos - (64, 64))

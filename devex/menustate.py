@@ -92,7 +92,7 @@ class MenuState:
     def event_pool(self):
         for event in self.shared.events:
             if event.type == pygame.KEYDOWN:
-                self.on_keydown()
+                self.on_keydown(event)
 
     def update(self):
         self.shared.widgets.update()
