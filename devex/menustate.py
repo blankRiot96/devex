@@ -83,16 +83,20 @@ class MenuState:
                 continue
             del self.shared.__dict__[field]
 
-    def update(self):
-        self.shared.widgets.update()
+    def on_keydown(self, event):
+        if event.key == pygame.K_RETURN:
+            self.next_state = State.GAME
+        elif event.key == pygame.K_t:
+            self.next_state = State.TUTORIAL
 
+    def event_pool(self):
         for event in self.shared.events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    self.next_state = State.GAME
-                elif event.key == pygame.K_t:
-                    self.next_state = State.TUTORIAL
+                self.on_keydown()
 
+    def update(self):
+        self.shared.widgets.update()
+        self.event_pool()
         self.bg.update()
         self.dash.update()
 

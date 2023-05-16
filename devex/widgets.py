@@ -84,13 +84,7 @@ class VerticalScrollBar:
         else:
             self.first_register = True
 
-    def update(self):
-        self.on_drag_scrollbar()
-        self.scroll_rect.topleft = self.scroll_pos
-        self.ratio = self.scroll_pos.y / self.max_scroll_height
-
-        if len(self.scrollables) == 0:
-            return
+    def update_scrollables(self):
         self.scrollables[-1].pos.y = (1 - self.ratio) * self.scrollables[
             -1
         ].original_pos.y
@@ -99,6 +93,15 @@ class VerticalScrollBar:
             scrollable.pos.y += (
                 self.scrollables[-1].pos.y - self.scrollables[-1].original_pos.y
             )
+
+    def update(self):
+        self.on_drag_scrollbar()
+        self.scroll_rect.topleft = self.scroll_pos
+        self.ratio = self.scroll_pos.y / self.max_scroll_height
+
+        if len(self.scrollables) == 0:
+            return
+        self.update_scrollables()
 
     def draw(self):
         self.surf.blit(self.scroll_surf, self.scroll_pos)
